@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Süt Takip" />
+
+  <title>Eren Süt Takip</title>
+
+  <style>
+    :root {
+      --arka-plan: #f3f7f5;
+      --kart: #ffffff;
+      --yazi: #17332c;
+      --soluk: #6b7d77;
+      --yesil: #0f766e;
+      --acik-yesil: #dff4ef;
+      --kenar: #dce7e3;
+      --kirmizi: #b42318;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--arka-plan);
+      color: var(--yazi);
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .uygulama {
+      width: min(100%, 720px);
+      margin: auto;
+
+      padding:
+        max(18px, env(safe-area-inset-top))
+        14px
+        calc(30px + env(safe-area-inset-bottom));
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .ust-yazi {
+      margin: 0 0 4px;
+      color: var(--yesil);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .ikon-buton {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--kenar);
+      border-radius: 15px;
+      background: white;
+      font-size: 20px;
+    }
+
+    .hafta {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+      gap: 8px;
+
+      padding: 8px;
+      border: 1px solid var(--kenar);
+      border-radius: 20px;
+      background: white;
+    }
+
+    .hafta-ok {
+      height: 48px;
+      border: 1px solid var(--kenar);
+      border-radius: 14px;
+      background: white;
+      font-size: 30px;
+    }
+
+    .hafta-baslik {
+      border: none;
+      background: transparent;
+      color: var(--yazi);
+    }
+
+    .hafta-baslik strong,
+    .hafta-baslik span {
+      display: block;
+    }
+
+    .hafta-baslik span {
+      margin-top: 3px;
+      color: var(--soluk);
+      font-size: 11px;
+    }
+
+    .gunler {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 14px 0 9px;
+      scrollbar-width: none;
+    }
+
+    .gunler::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gun {
+      flex: 0 0 73px;
+      min-height: 65px;
+      border: 1px solid var(--kenar);
+      border-radius: 16px;
+      background: white;
+      color: var(--yazi);
+    }
+
+    .gun span,
+    .gun strong {
+      display: block;
+    }
+
+    .gun span {
+      color: var(--soluk);
+      font-size: 12px;
+    }
+
+    .gun strong {
+      margin-top: 4px;
+      font-size: 17px;
+    }
+
+    .gun.secili {
+      border-color: var(--yesil);
+      background: var(--yesil);
+      color: white;
+    }
+
+    .gun.secili span {
+      color: #dff4ef;
+    }
+
+    .gun.bugun:not(.secili) {
+      border: 2px solid var(--yesil);
+    }
+
+    .tarih {
+      padding: 3px 4px 12px;
+      color: var(--soluk);
+      font-size: 14px;
+      text-transform: capitalize;
+    }
+
+    .kart {
+      margin-bottom: 14px;
+      padding: 16px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 22px;
+      background: var(--kart);
+
+      box-shadow: 0 10px 30px rgba(22, 61, 52, 0.07);
+    }
+
+    .kart-baslik {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .toplam {
+      flex-shrink: 0;
+      padding: 9px 13px;
+      border-radius: 999px;
+      background: var(--acik-yesil);
+      color: var(--yesil);
+      font-weight: 900;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 220px;
+      padding: 14px;
+
+      border: 2px solid var(--kenar);
+      border-radius: 16px;
+      outline: none;
+      resize: vertical;
+
+      background: #fcfefd;
+      color: var(--yazi);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    textarea:focus {
+      border-color: var(--yesil);
+    }
+
+    textarea.hatali {
+      border-color: var(--kirmizi);
+      background: #fffafa;
+    }
+
+    .hata {
+      margin: 8px 2px 0;
+      color: var(--kirmizi);
+      font-size: 13px;
+    }
+
+    .gizli {
+      display: none;
+    }
+
+    .butonlar {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .ana-buton,
+    .ikinci-buton,
+    .sil-buton {
+      min-height: 49px;
+      padding: 10px 13px;
+      border-radius: 14px;
+      font-weight: 800;
+    }
+
+    .ana-buton {
+      border: 1px solid var(--yesil);
+      background: var(--yesil);
+      color: white;
+    }
+
+    .ikinci-buton {
+      border: 1px solid var(--kenar);
+      background: white;
+      color: var(--yazi);
+    }
+
+    .sil-buton {
+      width: 100%;
+      border: 1px solid #efc2bd;
+      background: #fff0ee;
+      color: var(--kirmizi);
+    }
+
+    .durum {
+      min-height: 18px;
+      margin: 9px 2px 0;
+      color: var(--soluk);
+      font-size: 12px;
+    }
+
+    .ozet {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .ozet-kutu {
+      padding: 13px;
+      border: 1px solid var(--kenar);
+      border-radius: 15px;
+    }
+
+    .ozet-kutu span,
+    .ozet-kutu strong {
+      display: block;
+    }
+
+    .ozet-kutu span {
+      color: var(--soluk);
+      font-size: 12px;
+    }
+
+    .ozet-kutu strong {
+      margin-top: 5px;
+      font-size: 21px;
+    }
+
+    .genel-toplam {
+      grid-column: 1 / -1;
+      border-color: var(--yesil);
+      background: var(--yesil);
+      color: white;
+    }
+
+    .genel-toplam span {
+      color: #dff4ef;
+    }
+
+    .genel-toplam strong {
+      font-size: 26px;
+    }
+
+    .kayit-bilgisi {
+      margin: 12px 0 0;
+      color: var(--soluk);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .otomasyon-alani {
+      margin: 14px 0;
+    }
+
+    .otomasyon-buton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      width: 100%;
+      min-height: 56px;
+      padding: 14px 18px;
+
+      border: 2px solid var(--yesil);
+      border-radius: 18px;
+      background: var(--yesil);
+      color: white;
+
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .otomasyon-buton:active {
+      opacity: 0.85;
+    }
+
+    .sync-durum {
+      margin: 10px 2px 0;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .sync-durum.uyari {
+      color: #b45309;
+    }
+
+    .sync-durum.basarili {
+      color: var(--yesil);
+    }
+
+    .sync-hata-detay {
+      margin: 8px 0 0;
+      padding: 10px 12px;
+
+      border: 1px solid #efc2bd;
+      border-radius: 12px;
+      background: #fff0ee;
+
+      color: var(--kirmizi);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    dialog {
+      width: min(calc(100% - 24px), 480px);
+      padding: 0;
+
+      border: none;
+      border-radius: 22px;
+
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    dialog::backdrop {
+      background: rgba(5, 28, 23, 0.5);
+    }
+
+    .ayarlar {
+      padding: 18px;
+    }
+
+    .ayar-baslik {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ayarlar label {
+      display: block;
+      margin: 14px 0 6px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .ayarlar input {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 14px;
+      font-size: 16px;
+    }
+
+    .yardim {
+      margin: 6px 0 14px;
+      color: var(--soluk);
+      font-size: 12px;
+    }
+
+    .ayarlar .ana-buton {
+      width: 100%;
+    }
+
+    .bildirim {
+      position: fixed;
+      left: 50%;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+
+      width: min(calc(100% - 28px), 420px);
+      padding: 13px;
+
+      border-radius: 14px;
+      background: #133d35;
+      color: white;
+      text-align: center;
+
+      opacity: 0;
+      pointer-events: none;
+
+      transform: translate(-50%, 30px);
+      transition: 0.2s;
+    }
+
+    .bildirim.goster {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="uygulama">
+    <header>
+      <div>
+        <p class="ust-yazi">Süt ayrım bildirimi</p>
+        <h1>🥛 Eren Süt Takip</h1>
+      </div>
+
+      <button id="ayarButonu" class="ikon-buton">⚙️</button>
+    </header>
+
+    <section class="hafta">
+      <button id="oncekiHafta" class="hafta-ok">‹</button>
+
+      <button id="buHafta" class="hafta-baslik">
+        <strong id="haftaAraligi"></strong>
+        <span>Bu haftaya dön</span>
+      </button>
+
+      <button id="sonrakiHafta" class="hafta-ok">›</button>
+    </section>
+
+    <nav id="gunler" class="gunler"></nav>
+
+    <div id="secilenTarih" class="tarih"></div>
+
+    <section class="kart">
+      <div class="kart-baslik">
+        <div>
+          <p class="ust-yazi">☀️ Sabah</p>
+          <h2>Sabah Siparişleri</h2>
+        </div>
+
+        <div class="toplam">
+          <span id="sabahToplam">0</span> L
+        </div>
+      </div>
+
+      <textarea id="sabahSiparisleri" spellcheck="false"></textarea>
+
+      <p id="sabahHata" class="hata gizli"></p>
+
+      <div class="butonlar">
+        <button class="ikinci-buton" data-kopyala="sabah">
+          Kopyala
+        </button>
+
+        <button class="ana-buton" data-whatsapp="sabah">
+          WhatsApp'a Aç
+        </button>
+      </div>
+
+      <p id="sabahDurum" class="durum"></p>
+    </section>
+
+    <section class="kart">
+      <div class="kart-baslik">
+        <div>
+          <p class="ust-yazi">🌙 Akşam</p>
+          <h2>Akşam Siparişleri</h2>
+        </div>
+
+        <div class="toplam">
+          <span id="aksamToplam">0</span> L
+        </div>
+      </div>
+
+      <textarea id="aksamSiparisleri" spellcheck="false"></textarea>
+
+      <p id="aksamHata" class="hata gizli"></p>
+
+      <div class="butonlar">
+        <button class="ikinci-buton" data-kopyala="aksam">
+          Kopyala
+        </button>
+
+        <button class="ana-buton" data-whatsapp="aksam">
+          WhatsApp'a Aç
+        </button>
+      </div>
+
+      <p id="aksamDurum" class="durum"></p>
+    </section>
+
+    <section class="kart ozet">
+      <div class="ozet-kutu">
+        <span>Sabah</span>
+        <strong><span id="ozetSabah">0</span> L</strong>
+      </div>
+
+      <div class="ozet-kutu">
+        <span>Akşam</span>
+        <strong><span id="ozetAksam">0</span> L</strong>
+      </div>
+
+      <div class="ozet-kutu genel-toplam">
+        <span>Günlük toplam</span>
+        <strong><span id="gunlukToplam">0</span> L</strong>
+      </div>
+    </section>
+
+    <div class="otomasyon-alani">
+      <button id="otomasyonaKaydet" class="otomasyon-buton">
+        ☁️ Haftayı Kaydet
+      </button>
+
+      <p id="syncDurum" class="sync-durum"></p>
+      <div id="syncHataDetay" class="sync-hata-detay gizli"></div>
+    </div>
+
+    <button id="gunuTemizle" class="sil-buton">
+      Bu günün siparişlerini temizle
+    </button>
+
+    <p class="kayit-bilgisi">
+      Yazdıkların otomatik kaydedilir.
+    </p>
+  </div>
+
+  <dialog id="ayarPenceresi">
+    <form method="dialog" class="ayarlar">
+      <div class="ayar-baslik">
+        <h2>WhatsApp alıcısı</h2>
+
+        <button class="ikon-buton" value="cancel">
+          ✕
+        </button>
+      </div>
+
+      <label for="aliciAdi">Alıcı adı</label>
+      <input id="aliciAdi" type="text" />
+
+      <label for="telefon">Telefon numarası</label>
+      <input
+        id="telefon"
+        type="tel"
+        inputmode="numeric"
+        placeholder="905xxxxxxxxx"
+      />
+
+      <p class="yardim">
+        Ülke koduyla, başında + olmadan yaz.
+      </p>
+
+      <button id="ayarlariKaydet" class="ana-buton">
+        Ayarları kaydet
+      </button>
+    </form>
+  </dialog>
+
+  <div id="bildirim" class="bildirim"></div>
+
+  <script>
+    const VERI_ANAHTARI = "eren-sut-takip-veriler";
+    const AYAR_ANAHTARI = "eren-sut-takip-ayarlar";
+    const SYNC_ANAHTARI = "eren-sut-takip-sync";
+
+    const gunAdlari = [
+      "Pazartesi",
+      "Salı",
+      "Çarşamba",
+      "Perşembe",
+      "Cuma",
+      "Cumartesi",
+      "Pazar"
+    ];
+
+    const kisaGunler = [
+      "Pzt",
+      "Sal",
+      "Çar",
+      "Per",
+      "Cum",
+      "Cmt",
+      "Paz"
+    ];
+
+    const eleman = (secici) => document.querySelector(secici);
+
+    const alanlar = {
+      gunler: eleman("#gunler"),
+      haftaAraligi: eleman("#haftaAraligi"),
+      secilenTarih: eleman("#secilenTarih"),
+
+      sabah: eleman("#sabahSiparisleri"),
+      aksam: eleman("#aksamSiparisleri"),
+
+      sabahToplam: eleman("#sabahToplam"),
+      aksamToplam: eleman("#aksamToplam"),
+      ozetSabah: eleman("#ozetSabah"),
+      ozetAksam: eleman("#ozetAksam"),
+      gunlukToplam: eleman("#gunlukToplam"),
+
+      sabahHata: eleman("#sabahHata"),
+      aksamHata: eleman("#aksamHata"),
+
+      sabahDurum: eleman("#sabahDurum"),
+      aksamDurum: eleman("#aksamDurum"),
+
+      ayarPenceresi: eleman("#ayarPenceresi"),
+      aliciAdi: eleman("#aliciAdi"),
+      telefon: eleman("#telefon"),
+
+      bildirim: eleman("#bildirim"),
+
+      syncDurum: eleman("#syncDurum"),
+      syncHataDetay: eleman("#syncHataDetay")
+    };
+
+    function kayitOku(anahtar, varsayilan) {
+      try {
+        const kayit = localStorage.getItem(anahtar);
+
+        return kayit
+          ? JSON.parse(kayit)
+          : varsayilan;
+      } catch {
+        return varsayilan;
+      }
+    }
+
+    function pazartesiSirasi(tarih) {
+      return (tarih.getDay() + 6) % 7;
+    }
+
+    function haftaninPazartesisi(tarih) {
+      const sonuc = new Date(
+        tarih.getFullYear(),
+        tarih.getMonth(),
+        tarih.getDate()
+      );
+
+      sonuc.setDate(
+        sonuc.getDate() - pazartesiSirasi(sonuc)
+      );
+
+      sonuc.setHours(12, 0, 0, 0);
+
+      return sonuc;
+    }
+
+    function gunEkle(tarih, miktar) {
+      const sonuc = new Date(tarih);
+
+      sonuc.setDate(
+        sonuc.getDate() + miktar
+      );
+
+      return sonuc;
+    }
+
+    function tarihAnahtari(tarih) {
+      const yil = tarih.getFullYear();
+
+      const ay = String(
+        tarih.getMonth() + 1
+      ).padStart(2, "0");
+
+      const gun = String(
+        tarih.getDate()
+      ).padStart(2, "0");
+
+      return `${yil}-${ay}-${gun}`;
+    }
+
+    function tarihYaz(tarih, ayarlar) {
+      return new Intl.DateTimeFormat(
+        "tr-TR",
+        ayarlar
+      ).format(tarih);
+    }
+
+    function litreYaz(miktar) {
+      return new Intl.NumberFormat(
+        "tr-TR",
+        {
+          maximumFractionDigits: 2
+        }
+      ).format(miktar);
+    }
+
+    const durum = {
+      haftaBaslangici:
+        haftaninPazartesisi(new Date()),
+
+      secilenGun:
+        pazartesiSirasi(new Date()),
+
+      veriler:
+        kayitOku(VERI_ANAHTARI, {}),
+
+      ayarlar:
+        kayitOku(
+          AYAR_ANAHTARI,
+          {
+            aliciAdi: "",
+            telefon: ""
+          }
+        )
+    };
+
+    function haftaAnahtari() {
+      return tarihAnahtari(
+        durum.haftaBaslangici
+      );
+    }
+
+    function secilenTarih() {
+      return gunEkle(
+        durum.haftaBaslangici,
+        durum.secilenGun
+      );
+    }
+
+    function gunKaydi() {
+      const hafta = haftaAnahtari();
+
+      if (!durum.veriler[hafta]) {
+        durum.veriler[hafta] = {};
+      }
+
+      if (!durum.veriler[hafta][durum.secilenGun]) {
+        durum.veriler[hafta][durum.secilenGun] = {
+          sabah: "",
+          aksam: "",
+          sabahDurum: "",
+          aksamDurum: ""
+        };
+      }
+
+      return durum.veriler[hafta][durum.secilenGun];
+    }
+
+    function verileriKaydet() {
+      localStorage.setItem(
+        VERI_ANAHTARI,
+        JSON.stringify(durum.veriler)
+      );
+    }
+
+    function siparisleriOku(metin) {
+      const gecerli = [];
+      const hataliSatirlar = [];
+
+      const satirlar = metin.split(/\r?\n/);
+
+      satirlar.forEach((hamSatir, sira) => {
+        const satir = hamSatir.trim();
+
+        if (!satir) {
+          return;
+        }
+
+        const sonuc = satir.match(
+          /^(.*?)\s+([0-9]+(?:[.,][0-9]+)?)\s*[lL]?\s*$/
+        );
+
+        if (!sonuc || !sonuc[1].trim()) {
+          hataliSatirlar.push(sira + 1);
+          return;
+        }
+
+        const isim = sonuc[1].trim();
+
+        const litre = Number(
+          sonuc[2].replace(",", ".")
+        );
+
+        if (!Number.isFinite(litre)) {
+          hataliSatirlar.push(sira + 1);
+          return;
+        }
+
+        gecerli.push({
+          isim,
+          litre
+        });
+      });
+
+      const toplam = gecerli.reduce(
+        (sonuc, siparis) =>
+          sonuc + siparis.litre,
+        0
+      );
+
+      return {
+        gecerli,
+        hataliSatirlar,
+        toplam
+      };
+    }
+
+    function hataGoster(
+      metinAlani,
+      hataAlani,
+      sonuc
+    ) {
+      const hataVar =
+        sonuc.hataliSatirlar.length > 0;
+
+      metinAlani.classList.toggle(
+        "hatali",
+        hataVar
+      );
+
+      hataAlani.classList.toggle(
+        "gizli",
+        !hataVar
+      );
+
+      hataAlani.textContent = hataVar
+        ? `Litre bilgisi okunamayan satır: ${sonuc.hataliSatirlar.join(", ")}`
+        : "";
+    }
+
+    function toplamlariHesapla() {
+      const sabahSonuc =
+        siparisleriOku(alanlar.sabah.value);
+
+      const aksamSonuc =
+        siparisleriOku(alanlar.aksam.value);
+
+      const sabah =
+        litreYaz(sabahSonuc.toplam);
+
+      const aksam =
+        litreYaz(aksamSonuc.toplam);
+
+      const genel =
+        litreYaz(
+          sabahSonuc.toplam +
+          aksamSonuc.toplam
+        );
+
+      alanlar.sabahToplam.textContent = sabah;
+      alanlar.aksamToplam.textContent = aksam;
+
+      alanlar.ozetSabah.textContent = sabah;
+      alanlar.ozetAksam.textContent = aksam;
+
+      alanlar.gunlukToplam.textContent = genel;
+
+      hataGoster(
+        alanlar.sabah,
+        alanlar.sabahHata,
+        sabahSonuc
+      );
+
+      hataGoster(
+        alanlar.aksam,
+        alanlar.aksamHata,
+        aksamSonuc
+      );
+    }
+
+    function gunleriGoster() {
+      alanlar.gunler.innerHTML = "";
+
+      const bugun = new Date();
+
+      for (let sira = 0; sira < 7; sira++) {
+        const tarih = gunEkle(
+          durum.haftaBaslangici,
+          sira
+        );
+
+        const buton =
+          document.createElement("button");
+
+        buton.className = "gun";
+
+        if (sira === durum.secilenGun) {
+          buton.classList.add("secili");
+        }
+
+        if (
+          tarihAnahtari(tarih) ===
+          tarihAnahtari(bugun)
+        ) {
+          buton.classList.add("bugun");
+        }
+
+        buton.innerHTML = `
+          <span>${kisaGunler[sira]}</span>
+          <strong>${tarih.getDate()}</strong>
+        `;
+
+        buton.addEventListener(
+          "click",
+          () => {
+            durum.secilenGun = sira;
+            ekraniGoster();
+          }
+        );
+
+        alanlar.gunler.appendChild(buton);
+      }
+    }
+
+    function haftaBilgisiniGoster() {
+      const haftaSonu = gunEkle(
+        durum.haftaBaslangici,
+        6
+      );
+
+      alanlar.haftaAraligi.textContent =
+        `${tarihYaz(
+          durum.haftaBaslangici,
+          {
+            day: "numeric",
+            month: "short"
+          }
+        )} – ${tarihYaz(
+          haftaSonu,
+          {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          }
+        )}`;
+    }
+
+    function alanlariGoster() {
+      const kayit = gunKaydi();
+
+      alanlar.sabah.value =
+        kayit.sabah || "";
+
+      alanlar.aksam.value =
+        kayit.aksam || "";
+
+      alanlar.sabahDurum.textContent =
+        kayit.sabahDurum || "";
+
+      alanlar.aksamDurum.textContent =
+        kayit.aksamDurum || "";
+
+      alanlar.secilenTarih.textContent =
+        tarihYaz(
+          secilenTarih(),
+          {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          }
+        );
+
+      toplamlariHesapla();
+    }
+
+    function ekraniGoster() {
+      haftaBilgisiniGoster();
+      gunleriGoster();
+      alanlariGoster();
+      senkronDurumunuGoster();
+    }
+
+    function mesajOlustur(donem) {
+      const kayit = gunKaydi();
+
+      const sabahMi =
+        donem === "sabah";
+
+      const sonuc =
+        siparisleriOku(kayit[donem]);
+
+      const baslik = sabahMi
+        ? "☀️ SABAH SÜT AYRIMI"
+        : "🌙 AKŞAM SÜT AYRIMI";
+
+      const tarih =
+        `${gunAdlari[durum.secilenGun].toLocaleUpperCase("tr-TR")} • ` +
+        tarihYaz(
+          secilenTarih(),
+          {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          }
+        );
+
+      const siparisler =
+        sonuc.gecerli.length > 0
+          ? sonuc.gecerli
+              .map(
+                (siparis) =>
+                  `${siparis.isim} ${litreYaz(siparis.litre)} L`
+              )
+              .join("\n")
+          : "Sipariş yok";
+
+      return (
+        `${baslik}\n` +
+        `${tarih}\n\n` +
+        `${siparisler}\n\n` +
+        `Toplam: ${litreYaz(sonuc.toplam)} L`
+      );
+    }
+
+    function gunMesajiOlustur(gunSirasi, donem) {
+      const tarih = gunEkle(
+        durum.haftaBaslangici,
+        gunSirasi
+      );
+
+      const hafta = haftaAnahtari();
+      const gunVerisi = durum.veriler[hafta]
+        && durum.veriler[hafta][gunSirasi];
+
+      const metin = gunVerisi
+        ? (gunVerisi[donem] || "")
+        : "";
+
+      const sonuc = siparisleriOku(metin);
+
+      const sabahMi = donem === "sabah";
+
+      const baslik = sabahMi
+        ? "☀️ SABAH SÜT AYRIMI"
+        : "🌙 AKŞAM SÜT AYRIMI";
+
+      const tarihMetni =
+        `${gunAdlari[gunSirasi].toLocaleUpperCase("tr-TR")} • ` +
+        tarihYaz(
+          tarih,
+          {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          }
+        );
+
+      const siparisler =
+        sonuc.gecerli.length > 0
+          ? sonuc.gecerli
+              .map(
+                (siparis) =>
+                  `${siparis.isim} ${litreYaz(siparis.litre)} L`
+              )
+              .join("\n")
+          : "Sipariş yok";
+
+      return {
+        message:
+          `${baslik}\n` +
+          `${tarihMetni}\n\n` +
+          `${siparisler}\n\n` +
+          `Toplam: ${litreYaz(sonuc.toplam)} L`,
+        rawOrders: metin,
+        total: sonuc.toplam,
+        hataliSatirlar: sonuc.hataliSatirlar
+      };
+    }
+
+    function haftayiDogrula() {
+      const hatalar = [];
+      const hafta = haftaAnahtari();
+
+      for (let sira = 0; sira < 7; sira++) {
+        const gunVerisi = durum.veriler[hafta]
+          && durum.veriler[hafta][sira];
+
+        ["sabah", "aksam"].forEach(
+          (donem) => {
+            const metin = gunVerisi
+              ? (gunVerisi[donem] || "")
+              : "";
+
+            const sonuc = siparisleriOku(metin);
+
+            if (sonuc.hataliSatirlar.length > 0) {
+              const donemAdi = donem === "sabah"
+                ? "Sabah"
+                : "Akşam";
+
+              hatalar.push(
+                `${gunAdlari[sira]} ${donemAdi}: satır ${sonuc.hataliSatirlar.join(", ")}`
+              );
+            }
+          }
+        );
+      }
+
+      return hatalar;
+    }
+
+    function haftaPayloadOlustur() {
+      const gunler = [];
+
+      for (let sira = 0; sira < 7; sira++) {
+        const tarih = gunEkle(
+          durum.haftaBaslangici,
+          sira
+        );
+
+        const sabah =
+          gunMesajiOlustur(sira, "sabah");
+
+        const aksam =
+          gunMesajiOlustur(sira, "aksam");
+
+        gunler.push({
+          date: tarihAnahtari(tarih),
+          dayName: gunAdlari[sira],
+          morning: {
+            period: "sabah",
+            rawOrders: sabah.rawOrders,
+            total: sabah.total,
+            message: sabah.message
+          },
+          evening: {
+            period: "aksam",
+            rawOrders: aksam.rawOrders,
+            total: aksam.total,
+            message: aksam.message
+          }
+        });
+      }
+
+      return {
+        version: 1,
+        weekStart: tarihAnahtari(
+          durum.haftaBaslangici
+        ),
+        createdAt: new Date().toISOString(),
+        days: gunler
+      };
+    }
+
+    function veriHashiOlustur() {
+      const hafta = haftaAnahtari();
+      const haftaVerisi =
+        durum.veriler[hafta] || {};
+
+      let kaynak = hafta + "|";
+
+      for (let sira = 0; sira < 7; sira++) {
+        const gun = haftaVerisi[sira] || {};
+
+        kaynak +=
+          (gun.sabah || "") + "§" +
+          (gun.aksam || "") + "§";
+      }
+
+      let hash = 5381;
+
+      for (let i = 0; i < kaynak.length; i++) {
+        hash =
+          ((hash << 5) + hash) +
+          kaynak.charCodeAt(i);
+
+        hash = hash & hash;
+      }
+
+      return String(Math.abs(hash));
+    }
+
+    function senkronDurumunuGoster() {
+      const hafta = haftaAnahtari();
+
+      const sync =
+        kayitOku(SYNC_ANAHTARI, {});
+
+      if (
+        sync.haftaAnahtari !== hafta ||
+        !sync.zamanDamgasi
+      ) {
+        alanlar.syncDurum.textContent =
+          "⚠️ Bu hafta otomasyona kaydedilmedi";
+
+        alanlar.syncDurum.className =
+          "sync-durum uyari";
+
+        return;
+      }
+
+      const mevcutHash = veriHashiOlustur();
+
+      if (mevcutHash !== sync.veriHashi) {
+        alanlar.syncDurum.textContent =
+          "⚠️ Sipariş değişti, otomasyona tekrar kaydet";
+
+        alanlar.syncDurum.className =
+          "sync-durum uyari";
+
+        return;
+      }
+
+      const saat = tarihYaz(
+        new Date(sync.zamanDamgasi),
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
+
+      alanlar.syncDurum.textContent =
+        `✅ Otomasyona kaydedildi: ${saat}`;
+
+      alanlar.syncDurum.className =
+        "sync-durum basarili";
+    }
+
+    function syncBasariliKaydet() {
+      const sync = {
+        haftaAnahtari: haftaAnahtari(),
+        veriHashi: veriHashiOlustur(),
+        zamanDamgasi: new Date().toISOString()
+      };
+
+      localStorage.setItem(
+        SYNC_ANAHTARI,
+        JSON.stringify(sync)
+      );
+    }
+
+    async function panoyaKopyalaFallback(metin) {
+      try {
+        await navigator.clipboard.writeText(
+          metin
+        );
+      } catch {
+        const geciciAlan =
+          document.createElement("textarea");
+
+        geciciAlan.value = metin;
+
+        document.body.appendChild(
+          geciciAlan
+        );
+
+        geciciAlan.select();
+
+        document.execCommand("copy");
+
+        geciciAlan.remove();
+      }
+    }
+
+    async function shortcutAc() {
+      alanlar.syncHataDetay.classList.add(
+        "gizli"
+      );
+
+      const hatalar = haftayiDogrula();
+
+      if (hatalar.length > 0) {
+        alanlar.syncHataDetay.textContent =
+          "Hatalı satırlar:\n" +
+          hatalar.join("\n");
+
+        alanlar.syncHataDetay.classList.remove(
+          "gizli"
+        );
+
+        bildirimGoster(
+          "Önce hatalı satırları düzelt."
+        );
+
+        return;
+      }
+
+      const payload =
+        haftaPayloadOlustur();
+
+      const payloadText =
+        JSON.stringify(payload);
+
+      const iosKullanici =
+        /iPad|iPhone|iPod/.test(
+          navigator.userAgent
+        );
+
+      if (iosKullanici) {
+        const shortcutName =
+          encodeURIComponent(
+            "Süt Haftasını Kaydet"
+          );
+
+        const callbackBase =
+          window.location.href
+            .split("?")[0]
+            .split("#")[0];
+
+        const shortcutUrl =
+          "shortcuts://x-callback-url/run-shortcut" +
+          "?name=" + shortcutName +
+          "&input=text" +
+          "&text=" +
+            encodeURIComponent(payloadText) +
+          "&x-success=" +
+            encodeURIComponent(
+              callbackBase +
+              "?shortcutStatus=success"
+            ) +
+          "&x-cancel=" +
+            encodeURIComponent(
+              callbackBase +
+              "?shortcutStatus=cancel"
+            ) +
+          "&x-error=" +
+            encodeURIComponent(
+              callbackBase +
+              "?shortcutStatus=error"
+            );
+
+        window.location.href = shortcutUrl;
+        return;
+      }
+
+      await panoyaKopyalaFallback(
+        payloadText
+      );
+
+      syncBasariliKaydet();
+      senkronDurumunuGoster();
+
+      bildirimGoster(
+        "Hafta verisi panoya kopyalandı."
+      );
+    }
+
+    function callbackIsle() {
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      const durumuParam =
+        params.get("shortcutStatus");
+
+      if (!durumuParam) {
+        return;
+      }
+
+      const temizUrl =
+        window.location.href
+          .split("?")[0]
+          .split("#")[0];
+
+      history.replaceState(
+        null,
+        "",
+        temizUrl
+      );
+
+      if (durumuParam === "success") {
+        syncBasariliKaydet();
+
+        bildirimGoster(
+          "Hafta otomasyona kaydedildi."
+        );
+      } else if (durumuParam === "cancel") {
+        bildirimGoster(
+          "Otomasyon kaydı iptal edildi."
+        );
+      } else {
+        bildirimGoster(
+          "Otomasyon kaydında hata oluştu."
+        );
+      }
+    }
+
+    function bildirimGoster(metin) {
+      alanlar.bildirim.textContent = metin;
+
+      alanlar.bildirim.classList.add(
+        "goster"
+      );
+
+      clearTimeout(
+        bildirimGoster.zamanlayici
+      );
+
+      bildirimGoster.zamanlayici =
+        setTimeout(
+          () => {
+            alanlar.bildirim.classList.remove(
+              "goster"
+            );
+          },
+          2200
+        );
+    }
+
+    function durumuIsaretle(
+      donem,
+      aciklama
+    ) {
+      const kayit = gunKaydi();
+
+      const saat =
+        tarihYaz(
+          new Date(),
+          {
+            hour: "2-digit",
+            minute: "2-digit"
+          }
+        );
+
+      const metin =
+        `${aciklama}: ${saat}`;
+
+      kayit[`${donem}Durum`] = metin;
+
+      verileriKaydet();
+
+      if (donem === "sabah") {
+        alanlar.sabahDurum.textContent =
+          metin;
+      } else {
+        alanlar.aksamDurum.textContent =
+          metin;
+      }
+    }
+
+    async function mesajiKopyala(donem) {
+      const sonuc =
+        siparisleriOku(
+          gunKaydi()[donem]
+        );
+
+      if (
+        sonuc.hataliSatirlar.length > 0
+      ) {
+        bildirimGoster(
+          "Önce hatalı satırları düzelt."
+        );
+
+        return;
+      }
+
+      const mesaj =
+        mesajOlustur(donem);
+
+      try {
+        await navigator.clipboard.writeText(
+          mesaj
+        );
+      } catch {
+        const geciciAlan =
+          document.createElement("textarea");
+
+        geciciAlan.value = mesaj;
+
+        document.body.appendChild(
+          geciciAlan
+        );
+
+        geciciAlan.select();
+
+        document.execCommand("copy");
+
+        geciciAlan.remove();
+      }
+
+      durumuIsaretle(
+        donem,
+        "Mesaj kopyalandı"
+      );
+
+      bildirimGoster(
+        "Mesaj panoya kopyalandı."
+      );
+    }
+
+    function whatsAppAc(donem) {
+      const sonuc =
+        siparisleriOku(
+          gunKaydi()[donem]
+        );
+
+      if (
+        sonuc.hataliSatirlar.length > 0
+      ) {
+        bildirimGoster(
+          "Önce hatalı satırları düzelt."
+        );
+
+        return;
+      }
+
+      const telefon =
+        durum.ayarlar.telefon
+          .replace(/\D/g, "");
+
+      const mesaj =
+        encodeURIComponent(
+          mesajOlustur(donem)
+        );
+
+      const adres = telefon
+        ? `https://wa.me/${telefon}?text=${mesaj}`
+        : `https://wa.me/?text=${mesaj}`;
+
+      durumuIsaretle(
+        donem,
+        "WhatsApp açıldı"
+      );
+
+      window.open(
+        adres,
+        "_blank",
+        "noopener"
+      );
+    }
+
+    alanlar.sabah.addEventListener(
+      "input",
+      () => {
+        const kayit = gunKaydi();
+
+        kayit.sabah =
+          alanlar.sabah.value;
+
+        kayit.sabahDurum = "";
+
+        alanlar.sabahDurum.textContent =
+          "";
+
+        verileriKaydet();
+        toplamlariHesapla();
+        senkronDurumunuGoster();
+      }
+    );
+
+    alanlar.aksam.addEventListener(
+      "input",
+      () => {
+        const kayit = gunKaydi();
+
+        kayit.aksam =
+          alanlar.aksam.value;
+
+        kayit.aksamDurum = "";
+
+        alanlar.aksamDurum.textContent =
+          "";
+
+        verileriKaydet();
+        toplamlariHesapla();
+        senkronDurumunuGoster();
+      }
+    );
+
+    eleman("#oncekiHafta")
+      .addEventListener(
+        "click",
+        () => {
+          durum.haftaBaslangici =
+            gunEkle(
+              durum.haftaBaslangici,
+              -7
+            );
+
+          ekraniGoster();
+        }
+      );
+
+    eleman("#sonrakiHafta")
+      .addEventListener(
+        "click",
+        () => {
+          durum.haftaBaslangici =
+            gunEkle(
+              durum.haftaBaslangici,
+              7
+            );
+
+          ekraniGoster();
+        }
+      );
+
+    eleman("#buHafta")
+      .addEventListener(
+        "click",
+        () => {
+          durum.haftaBaslangici =
+            haftaninPazartesisi(
+              new Date()
+            );
+
+          durum.secilenGun =
+            pazartesiSirasi(
+              new Date()
+            );
+
+          ekraniGoster();
+        }
+      );
+
+    document
+      .querySelectorAll("[data-kopyala]")
+      .forEach(
+        (buton) => {
+          buton.addEventListener(
+            "click",
+            () => {
+              mesajiKopyala(
+                buton.dataset.kopyala
+              );
+            }
+          );
+        }
+      );
+
+    document
+      .querySelectorAll("[data-whatsapp]")
+      .forEach(
+        (buton) => {
+          buton.addEventListener(
+            "click",
+            () => {
+              whatsAppAc(
+                buton.dataset.whatsapp
+              );
+            }
+          );
+        }
+      );
+
+    eleman("#gunuTemizle")
+      .addEventListener(
+        "click",
+        () => {
+          const onay = confirm(
+            `${gunAdlari[durum.secilenGun]} günü için sabah ve akşam siparişleri silinsin mi?`
+          );
+
+          if (!onay) {
+            return;
+          }
+
+          delete durum.veriler[
+            haftaAnahtari()
+          ][durum.secilenGun];
+
+          verileriKaydet();
+          alanlariGoster();
+          senkronDurumunuGoster();
+
+          bildirimGoster(
+            "Günün siparişleri temizlendi."
+          );
+        }
+      );
+
+    eleman("#ayarButonu")
+      .addEventListener(
+        "click",
+        () => {
+          alanlar.aliciAdi.value =
+            durum.ayarlar.aliciAdi || "";
+
+          alanlar.telefon.value =
+            durum.ayarlar.telefon || "";
+
+          alanlar.ayarPenceresi.showModal();
+        }
+      );
+
+    eleman("#ayarlariKaydet")
+      .addEventListener(
+        "click",
+        (olay) => {
+          olay.preventDefault();
+
+          durum.ayarlar = {
+            aliciAdi:
+              alanlar.aliciAdi.value.trim(),
+
+            telefon:
+              alanlar.telefon.value.replace(
+                /\D/g,
+                ""
+              )
+          };
+
+          localStorage.setItem(
+            AYAR_ANAHTARI,
+            JSON.stringify(durum.ayarlar)
+          );
+
+          alanlar.ayarPenceresi.close();
+
+          bildirimGoster(
+            "Ayarlar kaydedildi."
+          );
+        }
+      );
+
+    eleman("#otomasyonaKaydet")
+      .addEventListener(
+        "click",
+        () => {
+          shortcutAc();
+        }
+      );
+
+    callbackIsle();
+    ekraniGoster();
+  </script>
+</body>
+</html>
