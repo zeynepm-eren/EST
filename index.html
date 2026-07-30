@@ -1279,13 +1279,13 @@
       );
 
       alanlar.syncDurum.textContent =
-        `✅ Otomasyona kaydedildi: ${saat}`;
+        `☁️ Aktarılmak üzere gönderildi: ${saat}`;
 
       alanlar.syncDurum.className =
         "sync-durum basarili";
     }
 
-    function syncBasariliKaydet() {
+    function syncGonderildiKaydet() {
       const sync = {
         haftaAnahtari: haftaAnahtari(),
         veriHashi: veriHashiOlustur(),
@@ -1356,37 +1356,22 @@
         );
 
       if (iosKullanici) {
-        const shortcutName =
-          encodeURIComponent(
-            "Süt Haftasını Kaydet"
-          );
-
-        const callbackBase =
-          window.location.href
-            .split("?")[0]
-            .split("#")[0];
-
         const shortcutUrl =
-          "shortcuts://x-callback-url/run-shortcut" +
-          "?name=" + shortcutName +
+          "shortcuts://run-shortcut" +
+          "?name=" +
+            encodeURIComponent(
+              "Süt Haftasını Kaydet"
+            ) +
           "&input=text" +
           "&text=" +
-            encodeURIComponent(payloadText) +
-          "&x-success=" +
-            encodeURIComponent(
-              callbackBase +
-              "?shortcutStatus=success"
-            ) +
-          "&x-cancel=" +
-            encodeURIComponent(
-              callbackBase +
-              "?shortcutStatus=cancel"
-            ) +
-          "&x-error=" +
-            encodeURIComponent(
-              callbackBase +
-              "?shortcutStatus=error"
-            );
+            encodeURIComponent(payloadText);
+
+        syncGonderildiKaydet();
+        senkronDurumunuGoster();
+
+        bildirimGoster(
+          "Kestirmeler açılıyor. Haftalık dosyalar kaydedilecek."
+        );
 
         window.location.href = shortcutUrl;
         return;
@@ -1396,53 +1381,12 @@
         payloadText
       );
 
-      syncBasariliKaydet();
+      syncGonderildiKaydet();
       senkronDurumunuGoster();
 
       bildirimGoster(
         "Hafta verisi panoya kopyalandı."
       );
-    }
-
-    function callbackIsle() {
-      const params =
-        new URLSearchParams(
-          window.location.search
-        );
-
-      const durumuParam =
-        params.get("shortcutStatus");
-
-      if (!durumuParam) {
-        return;
-      }
-
-      const temizUrl =
-        window.location.href
-          .split("?")[0]
-          .split("#")[0];
-
-      history.replaceState(
-        null,
-        "",
-        temizUrl
-      );
-
-      if (durumuParam === "success") {
-        syncBasariliKaydet();
-
-        bildirimGoster(
-          "Hafta otomasyona kaydedildi."
-        );
-      } else if (durumuParam === "cancel") {
-        bildirimGoster(
-          "Otomasyon kaydı iptal edildi."
-        );
-      } else {
-        bildirimGoster(
-          "Otomasyon kaydında hata oluştu."
-        );
-      }
     }
 
     function bildirimGoster(metin) {
@@ -1781,7 +1725,6 @@
         }
       );
 
-    callbackIsle();
     ekraniGoster();
   </script>
 </body>
