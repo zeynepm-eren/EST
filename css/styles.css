@@ -958,3 +958,188 @@ dialog::backdrop {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+/* Değişken süt fiyatı */
+.cari-fiyat-buton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  font: inherit;
+  text-align: right;
+}
+
+.cari-fiyat-buton span {
+  color: white;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.cari-fiyat-buton small {
+  color: #ccfbf1;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.fiyat-yardim {
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.fiyat-girdi {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ayarlar .fiyat-girdi input {
+  min-width: 0;
+}
+
+.fiyat-girdi span {
+  color: var(--soluk);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.fiyat-gecmisi-baslik {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 18px 0 7px;
+}
+
+.fiyat-gecmisi-baslik small {
+  color: var(--soluk);
+  font-size: 10px;
+}
+
+.fiyat-gecmisi {
+  max-height: 210px;
+  overflow-y: auto;
+  border: 1px solid var(--kenar);
+  border-radius: 14px;
+  background: #fcfefd;
+}
+
+.fiyat-gecmisi-satiri {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--kenar);
+}
+
+.fiyat-gecmisi-satiri:last-child {
+  border-bottom: none;
+}
+
+.fiyat-gecmisi-satiri span {
+  color: var(--soluk);
+  font-size: 12px;
+}
+
+.fiyat-gecmisi-satiri strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Haftalık satış grafiği */
+.satis-grafigi-karti {
+  overflow: hidden;
+}
+
+.grafik-aciklama {
+  margin: -3px 0 12px;
+  color: var(--soluk);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.haftalik-satis-grafigi {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 5px;
+  min-height: 172px;
+  padding-top: 6px;
+}
+
+.grafik-sutun {
+  display: grid;
+  grid-template-rows: 24px 116px 22px;
+  align-items: end;
+  min-width: 0;
+  text-align: center;
+}
+
+.grafik-deger {
+  align-self: start;
+  overflow: hidden;
+  color: var(--soluk);
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.grafik-cubuk-alani {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 116px;
+  padding: 0 3px;
+  border-bottom: 1px solid var(--kenar);
+}
+
+.grafik-cubuk {
+  width: 100%;
+  max-width: 28px;
+  min-height: 2px;
+  border-radius: 8px 8px 3px 3px;
+  background: #9ccfc5;
+}
+
+.grafik-sutun.secili-hafta .grafik-cubuk {
+  background: var(--yesil);
+}
+
+.grafik-sutun.secili-hafta .grafik-deger,
+.grafik-sutun.secili-hafta .grafik-etiket {
+  color: var(--yesil);
+  font-weight: 900;
+}
+
+.grafik-etiket {
+  align-self: end;
+  overflow: hidden;
+  padding-top: 5px;
+  color: var(--soluk);
+  font-size: 9px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 380px) {
+  .haftalik-satis-grafigi {
+    gap: 3px;
+  }
+
+  .grafik-cubuk-alani {
+    padding: 0 2px;
+  }
+
+  .grafik-deger,
+  .grafik-etiket {
+    font-size: 8px;
+  }
+}

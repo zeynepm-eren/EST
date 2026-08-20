@@ -19,7 +19,13 @@ const cariAlanlar = {
   odemeGirdileri: eleman("#odemeGirdileri"),
   islemBasligi: eleman("#islemBasligi"),
   hareketler: eleman("#cariHareketler"),
-  hareketHaftaEtiketi: eleman("#hareketHaftaEtiketi")
+  hareketHaftaEtiketi: eleman("#hareketHaftaEtiketi"),
+  guncelFiyat: eleman("#cariGuncelFiyat"),
+  kartFiyat: eleman("#cariKartFiyat"),
+  fiyatPenceresi: eleman("#fiyatPenceresi"),
+  fiyatTarih: eleman("#fiyatTarih"),
+  yeniLitreFiyati: eleman("#yeniLitreFiyati"),
+  fiyatGecmisi: eleman("#fiyatGecmisi")
 };
 
 
@@ -53,6 +59,10 @@ if (!Array.isArray(cariKaydi.hareketler)) {
   cariKaydi.hareketler = [];
 }
 
+cariKaydi.fiyatGecmisi = fiyatGecmisiniNormalizeEt(
+  cariKaydi.fiyatGecmisi
+);
+
 if (
   !cariKaydi.secilenMusteriId ||
   !cariKaydi.musteriler.some(
@@ -81,6 +91,178 @@ function tlYaz(miktar) {
         maximumFractionDigits: 2
       }
     ).format(miktar) + " TL"
+  );
+}
+
+
+function fiyatGecmisiniNormalizeEt(fiyatGecmisi) {
+  const kayitlar = Array.isArray(fiyatGecmisi)
+    ? fiyatGecmisi
+    : [];
+
+  const tariheGore = new Map();
+
+  kayitlar.forEach((kayit) => {
+    const tarih = String(kayit?.tarih || "");
+    const fiyat = Number(kayit?.fiyat);
+
+    if (
+      /^\d{4}-\d{2}-\d{2}$/.test(tarih) &&
+      Number.isFinite(fiyat) &&
+      fiyat > 0
+    ) {
+      tariheGore.set(tarih, {
+        tarih,
+        fiyat: Math.round(fiyat * 100) / 100
+      });
+    }
+  });
+
+  if (!tariheGore.has("1900-01-01")) {
+    tariheGore.set("1900-01-01", {
+      tarih: "1900-01-01",
+      fiyat: VARSAYILAN_LITRE_FIYATI
+    });
+  }
+
+  return Array.from(tariheGore.values()).sort(
+    (a, b) => a.tarih.localeCompare(b.tarih)
+  );
+}
+
+function tarihtekiLitreFiyati(tarih) {
+  const hedefTarih = tarih || tarihAnahtari(new Date());
+  let fiyat = VARSAYILAN_LITRE_FIYATI;
+
+  cariDurum.veriler.fiyatGecmisi.forEach(
+    (kayit) => {
+      if (kayit.tarih <= hedefTarih) {
+        fiyat = Number(kayit.fiyat) || fiyat;
+      }
+    }
+  );
+
+  return fiyat;
+}
+
+function hareketBirimFiyati(hareket) {
+  const kayitliFiyat = Number(hareket.birimFiyat);
+
+  if (Number.isFinite(kayitliFiyat) && kayitliFiyat > 0) {
+    return kayitliFiyat;
+  }
+
+  const litre = Number(hareket.litre);
+  const tutar = Number(hareket.tutar);
+
+  if (
+    Number.isFinite(litre) && litre > 0 &&
+    Number.isFinite(tutar) && tutar > 0
+  ) {
+    return tutar / litre;
+  }
+
+  return tarihtekiLitreFiyati(hareket.tarih);
+}
+
+function fiyatEtiketleriniGoster() {
+  const bugunFiyati = tarihtekiLitreFiyati(
+    tarihAnahtari(new Date())
+  );
+  const islemTarihi = cariAlanlar.tarih.value ||
+    tarihAnahtari(new Date());
+  const islemFiyati = tarihtekiLitreFiyati(islemTarihi);
+
+  cariAlanlar.guncelFiyat.textContent =
+    `${tlYaz(bugunFiyati)} / L`;
+  cariAlanlar.kartFiyat.textContent =
+    `${tlYaz(islemFiyati)}/L`;
+}
+
+function fiyatGecmisiniGoster() {
+  cariAlanlar.fiyatGecmisi.innerHTML = "";
+
+  cariDurum.veriler.fiyatGecmisi
+    .slice()
+    .sort((a, b) => b.tarih.localeCompare(a.tarih))
+    .forEach((kayit) => {
+      const satir = document.createElement("div");
+      satir.className = "fiyat-gecmisi-satiri";
+
+      const tarih = document.createElement("span");
+      tarih.textContent = kayit.tarih === "1900-01-01"
+        ? "Başlangıç fiyatı"
+        : tarihYaz(
+            new Date(`${kayit.tarih}T12:00:00`),
+            {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric"
+            }
+          );
+
+      const fiyat = document.createElement("strong");
+      fiyat.textContent = `${tlYaz(kayit.fiyat)} / L`;
+
+      satir.appendChild(tarih);
+      satir.appendChild(fiyat);
+      cariAlanlar.fiyatGecmisi.appendChild(satir);
+    });
+}
+
+function fiyatPenceresiniAc() {
+  const bugun = tarihAnahtari(new Date());
+  cariAlanlar.fiyatTarih.value = bugun;
+  cariAlanlar.yeniLitreFiyati.value = String(
+    tarihtekiLitreFiyati(bugun)
+  );
+  fiyatGecmisiniGoster();
+  cariAlanlar.fiyatPenceresi.showModal();
+}
+
+function litreFiyatiniKaydet() {
+  const tarih = cariAlanlar.fiyatTarih.value;
+  const fiyat = Number(cariAlanlar.yeniLitreFiyati.value);
+
+  if (!tarih) {
+    bildirimGoster("Fiyatın geçerli olacağı tarihi seçmelisin.");
+    return;
+  }
+
+  if (!Number.isFinite(fiyat) || fiyat <= 0) {
+    bildirimGoster("Sıfırdan büyük bir litre fiyatı girmelisin.");
+    return;
+  }
+
+  const duzeltilmisFiyat = Math.round(fiyat * 100) / 100;
+  const ayniTarih = cariDurum.veriler.fiyatGecmisi.find(
+    (kayit) => kayit.tarih === tarih
+  );
+
+  if (ayniTarih) {
+    ayniTarih.fiyat = duzeltilmisFiyat;
+  } else {
+    cariDurum.veriler.fiyatGecmisi.push({
+      tarih,
+      fiyat: duzeltilmisFiyat
+    });
+  }
+
+  cariDurum.veriler.fiyatGecmisi = fiyatGecmisiniNormalizeEt(
+    cariDurum.veriler.fiyatGecmisi
+  );
+
+  cariVerileriKaydet();
+  fiyatGecmisiniGoster();
+  cariEkraniniGoster();
+  cariAlanlar.fiyatPenceresi.close();
+
+  bildirimGoster(
+    `${tarihYaz(new Date(`${tarih}T12:00:00`), {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    })} tarihinden itibaren fiyat ${tlYaz(duzeltilmisFiyat)} / L.`
   );
 }
 
@@ -272,8 +454,14 @@ function cariTutariniGoster() {
     Number(cariAlanlar.litre.value) || 0
   );
 
+  const tarih = cariAlanlar.tarih.value ||
+    tarihAnahtari(new Date());
+  const birimFiyat = tarihtekiLitreFiyati(tarih);
+
   cariAlanlar.tutar.textContent =
-    tlYaz(litre * GENEL_LITRE_FIYATI);
+    tlYaz(litre * birimFiyat);
+  cariAlanlar.kartFiyat.textContent =
+    `${tlYaz(birimFiyat)}/L`;
 }
 
 function cariIslemTurunuGoster() {
@@ -381,7 +569,7 @@ function cariHareketleriGoster() {
             document.createElement("strong");
 
           ad.textContent = hareket.tur === "satis"
-            ? `${litreYaz(hareket.litre)} L süt × ${tlYaz(hareket.birimFiyat || GENEL_LITRE_FIYATI)}`
+            ? `${litreYaz(hareket.litre)} L süt × ${tlYaz(hareketBirimFiyati(hareket))}`
             : "Ödeme";
 
           bilgi.appendChild(ad);
@@ -451,6 +639,7 @@ function cariEkraniniGoster() {
   cariSecimleriniGoster();
   cariBakiyesiniGoster();
   cariHaftasiniGoster();
+  fiyatEtiketleriniGoster();
   cariTutariniGoster();
   cariIslemTurunuGoster();
   cariHareketleriGoster();
@@ -491,10 +680,11 @@ function cariHareketKaydet() {
       return;
     }
 
+    const birimFiyat = tarihtekiLitreFiyati(tarih);
+
     hareket.litre = litre;
-    hareket.birimFiyat = GENEL_LITRE_FIYATI;
-    hareket.tutar =
-      litre * GENEL_LITRE_FIYATI;
+    hareket.birimFiyat = birimFiyat;
+    hareket.tutar = litre * birimFiyat;
   } else {
     const odeme = Number(
       cariAlanlar.odeme.value
@@ -653,6 +843,14 @@ cariAlanlar.litre.addEventListener(
   cariTutariniGoster
 );
 
+cariAlanlar.tarih.addEventListener(
+  "change",
+  () => {
+    fiyatEtiketleriniGoster();
+    cariTutariniGoster();
+  }
+);
+
 cariAlanlar.secim.addEventListener(
   "change",
   () => {
@@ -671,6 +869,16 @@ eleman("#yeniCari").addEventListener(
 eleman("#cariKaydet").addEventListener(
   "click",
   cariHareketKaydet
+);
+
+eleman("#fiyatDegistirButonu").addEventListener(
+  "click",
+  fiyatPenceresiniAc
+);
+
+eleman("#fiyatiKaydet").addEventListener(
+  "click",
+  litreFiyatiniKaydet
 );
 
 eleman("#cariOncekiHafta")
@@ -711,6 +919,9 @@ eleman("#cariBuHafta")
 
 cariAlanlar.tarih.value =
   tarihAnahtari(new Date());
+cariAlanlar.fiyatTarih.value =
+  tarihAnahtari(new Date());
 
+cariVerileriKaydet();
 cariEkraniniGoster();
 
