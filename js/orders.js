@@ -15,6 +15,8 @@ const alanlar = {
   ozetSabah: eleman("#ozetSabah"),
   ozetAksam: eleman("#ozetAksam"),
   gunlukToplam: eleman("#gunlukToplam"),
+  haftaToplamLitre: eleman("#haftaToplamLitre"),
+  haftaSatisGrafigi: eleman("#haftaSatisGrafigi"),
 
   sabahHata: eleman("#sabahHata"),
   aksamHata: eleman("#aksamHata"),
@@ -208,6 +210,87 @@ function toplamlariHesapla() {
   );
 }
 
+
+function gunlukSiparisToplami(gunSirasi) {
+  const hafta = durum.veriler[haftaAnahtari()] || {};
+  const gun = hafta[gunSirasi] || {};
+  const sabah = siparisleriOku(gun.sabah || "").toplam;
+  const aksam = siparisleriOku(gun.aksam || "").toplam;
+
+  return {
+    sabah,
+    aksam,
+    toplam: sabah + aksam
+  };
+}
+
+function haftaSatisGrafiginiGoster() {
+  const gunToplamlari = Array.from(
+    { length: 7 },
+    (_, sira) => gunlukSiparisToplami(sira)
+  );
+  const enYuksek = Math.max(
+    1,
+    ...gunToplamlari.map((gun) => gun.toplam)
+  );
+  const haftaToplami = gunToplamlari.reduce(
+    (toplam, gun) => toplam + gun.toplam,
+    0
+  );
+
+  alanlar.haftaToplamLitre.textContent =
+    `${litreYaz(haftaToplami)} L`;
+  alanlar.haftaSatisGrafigi.innerHTML = "";
+
+  gunToplamlari.forEach((gun, sira) => {
+    const sutun = document.createElement("div");
+    sutun.className = "grafik-sutun";
+
+    if (sira === durum.secilenGun) {
+      sutun.classList.add("secili-hafta");
+    }
+
+    const deger = document.createElement("span");
+    deger.className = "grafik-deger";
+    deger.textContent = `${litreYaz(gun.toplam)} L`;
+
+    const cubukAlani = document.createElement("div");
+    cubukAlani.className = "grafik-cubuk-alani";
+
+    const cubuk = document.createElement("div");
+    cubuk.className = "grafik-cubuk";
+    cubuk.style.height = gun.toplam > 0
+      ? `${Math.max(6, (gun.toplam / enYuksek) * 100)}%`
+      : "2px";
+
+    cubukAlani.appendChild(cubuk);
+
+    const etiket = document.createElement("span");
+    etiket.className = "grafik-etiket";
+    etiket.textContent = kisaGunler[sira];
+
+    sutun.title =
+      `${gunAdlari[sira]}: ${litreYaz(gun.toplam)} L ` +
+      `(sabah ${litreYaz(gun.sabah)} L, akşam ${litreYaz(gun.aksam)} L)`;
+
+    sutun.appendChild(deger);
+    sutun.appendChild(cubukAlani);
+    sutun.appendChild(etiket);
+    alanlar.haftaSatisGrafigi.appendChild(sutun);
+  });
+
+  alanlar.haftaSatisGrafigi.setAttribute(
+    "aria-label",
+    gunToplamlari
+      .map(
+        (gun, sira) =>
+          `${gunAdlari[sira]} ${litreYaz(gun.toplam)} litre`
+      )
+      .join(", ") +
+      `. Haftalık toplam ${litreYaz(haftaToplami)} litre.`
+  );
+}
+
 function gunleriGoster() {
   alanlar.gunler.innerHTML = "";
 
@@ -308,6 +391,7 @@ function ekraniGoster() {
   haftaBilgisiniGoster();
   gunleriGoster();
   alanlariGoster();
+  haftaSatisGrafiginiGoster();
   senkronDurumunuGoster();
 }
 
@@ -821,6 +905,7 @@ alanlar.sabah.addEventListener(
 
     verileriKaydet();
     toplamlariHesapla();
+    haftaSatisGrafiginiGoster();
     senkronDurumunuGoster();
   }
 );
@@ -840,6 +925,7 @@ alanlar.aksam.addEventListener(
 
     verileriKaydet();
     toplamlariHesapla();
+    haftaSatisGrafiginiGoster();
     senkronDurumunuGoster();
   }
 );
@@ -938,6 +1024,7 @@ eleman("#gunuTemizle")
 
       verileriKaydet();
       alanlariGoster();
+      haftaSatisGrafiginiGoster();
       senkronDurumunuGoster();
 
       bildirimGoster(

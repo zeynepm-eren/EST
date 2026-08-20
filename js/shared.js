@@ -6,7 +6,7 @@ const VERI_ANAHTARI = "eren-sut-takip-veriler";
 const AYAR_ANAHTARI = "eren-sut-takip-ayarlar";
 const SYNC_ANAHTARI = "eren-sut-takip-sync";
 const CARI_ANAHTARI = "eren-sut-takip-cariler";
-const GENEL_LITRE_FIYATI = 36;
+const VARSAYILAN_LITRE_FIYATI = 36;
 
 const gunAdlari = [
   "Pazartesi",

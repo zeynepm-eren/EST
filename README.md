@@ -16,6 +16,7 @@ Uygulama herhangi bir sunucu veya haricî paket gerektirmeden çalışır. Veril
 - Girilen süt miktarlarını otomatik toplama
 - Hatalı sipariş satırlarını gösterme
 - Günlük toplam litre hesabı
+- Haftalık toplam litre ve günlük süt grafiği
 - Hazır WhatsApp mesajı oluşturma
 - Mesajı panoya kopyalama
 - Önceki ve sonraki haftaları görüntüleme
@@ -42,20 +43,15 @@ Siparişler aşağıdaki biçimde girilebilir:
 
 ## Süt fiyatı
 
-Uygulamadaki ortak süt fiyatı:
+Başlangıç süt fiyatı 36 TL/L olarak tanımlıdır. Cari Panel'in üstündeki fiyat düğmesinden yeni litre fiyatı ve geçerli olacağı tarih kaydedilebilir.
 
-    1 litre süt = 36 TL
+Fiyatlar tarihçeli tutulur. Örneğin 20 Ağustos'ta fiyatı 40 TL/L yaparsanız:
 
-Hızlı litre butonları:
+- 19 Ağustos tarihli yeni bir satış 36 TL/L üzerinden hesaplanır.
+- 20 Ağustos ve sonrasındaki yeni satışlar 40 TL/L üzerinden hesaplanır.
+- Daha önce kaydedilmiş satışların tutarı ve birim fiyatı değiştirilmez.
 
-- 2 litre = 72 TL
-- 2,5 litre = 90 TL
-- 5 litre = 180 TL
-- 15 litre = 540 TL
-
-Bir litre butonuna birden fazla kez basıldığında miktar birikerek artar. Eksiltme butonlarıyla yanlış giriş düzeltilebilir.
-
-Her satış kaydında işlem sırasında kullanılan litre fiyatı ayrıca saklanır. İleride genel fiyat değişse bile eski cari hareketlerin tutarı değişmez.
+Her satış kaydında işlem sırasında kullanılan litre fiyatı ayrıca saklanır. Böylece fiyat daha sonra değişse bile eski cari hareketlerin tutarı korunur.
 
 ## Dosya yapısı
 
