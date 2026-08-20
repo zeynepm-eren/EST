@@ -138,6 +138,27 @@
       </div>
     </section>
 
+    <section class="kart satis-grafigi-karti">
+      <div class="kart-baslik">
+        <div>
+          <p class="ust-yazi">Haftalık özet</p>
+          <h2>Haftalık süt grafiği</h2>
+        </div>
+        <div id="haftaToplamLitre" class="toplam">0 L</div>
+      </div>
+
+      <p class="grafik-aciklama">
+        Her sütun o günün sabah + akşam toplamını gösterir.
+      </p>
+
+      <div
+        id="haftaSatisGrafigi"
+        class="haftalik-satis-grafigi hafta-gun-grafigi"
+        role="img"
+        aria-label="Seçili haftanın günlük süt satış grafiği"
+      ></div>
+    </section>
+
     <div class="otomasyon-alani">
       <button id="otomasyonaKaydet" class="otomasyon-buton">
         ☁️ Haftayı Kaydet
@@ -163,7 +184,15 @@
             <p class="ust-yazi cari-ust-yazi">Cari hesap</p>
             <h2>Müşteri hesabı</h2>
           </div>
-          <span class="cari-fiyat-etiketi">36 TL / L</span>
+          <button
+            id="fiyatDegistirButonu"
+            class="cari-fiyat-etiketi cari-fiyat-buton"
+            type="button"
+            title="Süt litre fiyatını değiştir"
+          >
+            <span id="cariGuncelFiyat">36 TL / L</span>
+            <small>değiştir</small>
+          </button>
         </div>
 
         <div class="cari-secim-grubu">
@@ -234,7 +263,7 @@
             <p class="ust-yazi">Yeni hareket</p>
             <h2 id="islemBasligi">Süt satışı ekle</h2>
           </div>
-          <div class="toplam">36 TL/L</div>
+          <div id="cariKartFiyat" class="toplam">36 TL/L</div>
         </div>
 
         <div class="islem-sekmeleri">
@@ -333,6 +362,49 @@
       </p>
     </section>
   </div>
+
+  <dialog id="fiyatPenceresi">
+    <form method="dialog" class="ayarlar">
+      <div class="ayar-baslik">
+        <h2>Süt litre fiyatı</h2>
+
+        <button class="ikon-buton" value="cancel" aria-label="Fiyat penceresini kapat">
+          ✕
+        </button>
+      </div>
+
+      <p class="yardim fiyat-yardim">
+        Yeni fiyat seçtiğin tarihten itibaren yeni satışlarda kullanılır.
+        Önceden kaydedilmiş satışların tutarı ve litre fiyatı değişmez.
+      </p>
+
+      <label for="fiyatTarih">Geçerli olacağı tarih</label>
+      <input id="fiyatTarih" type="date" />
+
+      <label for="yeniLitreFiyati">Yeni litre fiyatı</label>
+      <div class="fiyat-girdi">
+        <input
+          id="yeniLitreFiyati"
+          type="number"
+          inputmode="decimal"
+          min="0.01"
+          step="0.01"
+          placeholder="Örn. 40"
+        />
+        <span>TL / L</span>
+      </div>
+
+      <button id="fiyatiKaydet" class="ana-buton" type="button">
+        Fiyatı kaydet
+      </button>
+
+      <div class="fiyat-gecmisi-baslik">
+        <strong>Fiyat geçmişi</strong>
+        <small>Tarihe göre uygulanır</small>
+      </div>
+      <div id="fiyatGecmisi" class="fiyat-gecmisi"></div>
+    </form>
+  </dialog>
 
   <dialog id="ayarPenceresi">
     <form method="dialog" class="ayarlar">
