@@ -93,6 +93,74 @@ function verileriKaydet() {
     VERI_ANAHTARI,
     JSON.stringify(durum.veriler)
   );
+
+  if (typeof window.bulutaKaydet === "function") {
+    window.bulutaKaydet(
+      "siparisler",
+      durum.veriler
+    );
+  }
+}
+
+function siparisVerileriniUygula(yeniVeriler) {
+  const temizVeriler =
+    yeniVeriler &&
+    typeof yeniVeriler === "object" &&
+    !Array.isArray(yeniVeriler)
+      ? yeniVeriler
+      : {};
+
+  if (
+    JSON.stringify(temizVeriler) ===
+    JSON.stringify(durum.veriler)
+  ) {
+    return;
+  }
+
+  durum.veriler = temizVeriler;
+
+  localStorage.setItem(
+    VERI_ANAHTARI,
+    JSON.stringify(durum.veriler)
+  );
+
+  ekraniGoster();
+}
+
+function ayarlariUygula(yeniAyarlar) {
+  const temizAyarlar = {
+    aliciAdi:
+      yeniAyarlar &&
+      typeof yeniAyarlar.aliciAdi === "string"
+        ? yeniAyarlar.aliciAdi
+        : "",
+    telefon:
+      yeniAyarlar &&
+      typeof yeniAyarlar.telefon === "string"
+        ? yeniAyarlar.telefon
+        : ""
+  };
+
+  if (
+    JSON.stringify(temizAyarlar) ===
+    JSON.stringify(durum.ayarlar)
+  ) {
+    return;
+  }
+
+  durum.ayarlar = temizAyarlar;
+
+  localStorage.setItem(
+    AYAR_ANAHTARI,
+    JSON.stringify(durum.ayarlar)
+  );
+
+  if (alanlar.ayarPenceresi.open) {
+    alanlar.aliciAdi.value =
+      durum.ayarlar.aliciAdi;
+    alanlar.telefon.value =
+      durum.ayarlar.telefon;
+  }
 }
 
 function siparisleriOku(metin) {
@@ -1068,6 +1136,13 @@ eleman("#ayarlariKaydet")
         AYAR_ANAHTARI,
         JSON.stringify(durum.ayarlar)
       );
+
+      if (typeof window.bulutaKaydet === "function") {
+        window.bulutaKaydet(
+          "ayarlar",
+          durum.ayarlar
+        );
+      }
 
       alanlar.ayarPenceresi.close();
 

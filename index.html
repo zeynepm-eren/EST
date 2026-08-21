@@ -18,6 +18,57 @@
 </head>
 
 <body>
+  <div id="girisKatmani" class="giris-katmani">
+    <section class="giris-karti" aria-live="polite">
+      <div class="giris-logo">🥛</div>
+      <h2>Eren Süt Takip</h2>
+      <p id="girisAciklama" class="giris-aciklama">
+        Ortak verilere ulaşmak için giriş yap.
+      </p>
+
+      <form id="girisFormu" class="giris-formu">
+        <label for="girisEposta">E-posta</label>
+        <input
+          id="girisEposta"
+          type="email"
+          autocomplete="username"
+          required
+        />
+
+        <label for="girisSifre">Şifre</label>
+        <input
+          id="girisSifre"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+
+        <button id="girisButonu" class="ana-buton" type="submit">
+          Giriş yap
+        </button>
+      </form>
+
+      <div id="gocPaneli" class="goc-paneli gizli">
+        <h3>İlk bulut aktarımı</h3>
+        <p>
+          Firestore henüz boş. Eski kayıtların bulunduğu cihazdan
+          bu aktarımı yalnızca bir kez yap.
+        </p>
+
+        <div id="yerelVeriOzeti" class="yerel-veri-ozeti"></div>
+
+        <button id="yereliBulutaAktar" class="ana-buton" type="button">
+          Bu cihazdaki verileri buluta aktar
+        </button>
+
+        <p class="goc-uyari">
+          Aktarım tamamlanana kadar tarayıcı/site verilerini temizleme.
+        </p>
+      </div>
+
+      <p id="girisHata" class="giris-hata"></p>
+    </section>
+  </div>
   <div class="uygulama">
     <header>
       <div>
@@ -25,7 +76,17 @@
         <h1>🥛 Eren Süt Takip</h1>
       </div>
 
-      <button id="ayarButonu" class="ikon-buton">⚙️</button>
+      <div class="header-araclari">
+        <span id="bulutDurum" class="bulut-durum">Bağlanıyor…</span>
+        <button
+          id="cikisButonu"
+          class="ikon-buton cikis-buton gizli"
+          type="button"
+          title="Çıkış yap"
+          aria-label="Çıkış yap"
+        >↪</button>
+        <button id="ayarButonu" class="ikon-buton" type="button">⚙️</button>
+      </div>
     </header>
 
     <nav class="ana-sekmeler" aria-label="Uygulama bölümleri">
@@ -173,7 +234,7 @@
     </button>
 
     <p class="kayit-bilgisi">
-      Yazdıkların otomatik kaydedilir.
+      Yazdıkların buluta ve bu cihaza otomatik kaydedilir.
     </p>
     </section>
 
@@ -358,7 +419,7 @@
       <div id="cariHareketler"></div>
 
       <p class="kayit-bilgisi">
-        Cari kayıtları bu cihazda otomatik saklanır.
+        Cari kayıtları bulutta ve bu cihazda otomatik saklanır.
       </p>
     </section>
   </div>
@@ -443,5 +504,19 @@
   <script src="js/orders.js" defer></script>
   <script src="js/accounts.js" defer></script>
   <script src="js/app.js" defer></script>
+
+  <script
+    src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"
+    defer
+  ></script>
+  <script
+    src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"
+    defer
+  ></script>
+  <script
+    src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"
+    defer
+  ></script>
+  <script src="js/firebase.js" defer></script>
 </body>
 </html>

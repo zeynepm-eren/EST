@@ -61,6 +61,7 @@ Her satış kaydında işlem sırasında kullanılan litre fiyatı ayrıca sakla
 - `js/orders.js` — Sipariş, WhatsApp ve haftalık aktarım işlemleri
 - `js/accounts.js` — Cari müşteri, süt satışı, ödeme ve bakiye işlemleri
 - `js/app.js` — Siparişler ve Cari Panel arasındaki ekran geçişleri
+- `js/firebase.js` — Firebase Authentication, Firestore senkronizasyonu ve ilk veri aktarımı
 
 ## Çalıştırma
 
@@ -72,7 +73,11 @@ GitHub Pages üzerinden yayınlandığında uygulama telefon veya bilgisayar tar
 
 ## Veri saklama
 
-Uygulama verileri tarayıcının `localStorage` alanında saklanır.
+Firebase sürümünde Firestore ortak veri kaynağı olarak kullanılır; `localStorage` ise cihazdaki yerel kopya/yedek olarak korunur. Siparişler, cari kayıtlar, fiyat geçmişi ve WhatsApp ayarları giriş yapılan cihazlar arasında senkronize edilir.
+
+İlk geçişte Firestore boşsa, eski kayıtların bulunduğu cihazdan açık onayla tek seferlik aktarım yapılır. Boş bir cihazın buluttaki dolu veriyi ezmesini önlemek için otomatik ilk yükleme yapılmaz.
+
+İlk aktarım tamamlanana kadar eski verilerin bulunduğu cihazda tarayıcı/site verileri temizlenmemelidir.
 
 
 Sayfanın veya GitHub Pages içeriğinin güncellenmesi normal şartlarda kayıtları silmez. Aynı adres ve aynı tarayıcı kullanılmaya devam edildiği sürece veriler korunur.
@@ -105,6 +110,8 @@ Yayın dalına gönderilen yeni değişiklikler GitHub Pages sitesine otomatik o
 - CSS3
 - Vanilla JavaScript
 - Web Storage API
+- Firebase Authentication
+- Cloud Firestore
 - WhatsApp `wa.me` bağlantıları
 - iOS Shortcuts bağlantısı
 
@@ -116,7 +123,6 @@ Yayın dalına gönderilen yeni değişiklikler GitHub Pages sitesine otomatik o
 - Cari hareketlerini düzenleme ve geri alma
 - Aylık raporlar
 - Cari ekstresini WhatsApp veya PDF olarak paylaşma
-- Çoklu cihaz ve çevrim içi veritabanı desteği
 
 ## Lisans
 

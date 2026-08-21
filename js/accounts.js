@@ -271,6 +271,104 @@ function cariVerileriKaydet() {
     CARI_ANAHTARI,
     JSON.stringify(cariDurum.veriler)
   );
+
+  if (typeof window.bulutaKaydet === "function") {
+    window.bulutaKaydet(
+      "cariler",
+      cariDurum.veriler
+    );
+  }
+}
+
+function cariTercihiniKaydet() {
+  localStorage.setItem(
+    CARI_ANAHTARI,
+    JSON.stringify(cariDurum.veriler)
+  );
+}
+
+function cariVerileriniUygula(yeniVeriler) {
+  const kaynak =
+    yeniVeriler &&
+    typeof yeniVeriler === "object" &&
+    !Array.isArray(yeniVeriler)
+      ? yeniVeriler
+      : {};
+
+  const musteriler = Array.isArray(kaynak.musteriler)
+    ? kaynak.musteriler.slice()
+    : [];
+  const hareketler = Array.isArray(kaynak.hareketler)
+    ? kaynak.hareketler.slice()
+    : [];
+
+  if (musteriler.length === 0) {
+    musteriler.push({
+      id: "ahmet",
+      ad: "Ahmet"
+    });
+  }
+
+  const oncekiSecim =
+    cariDurum.veriler.secilenMusteriId;
+
+  let secilenMusteriId =
+    typeof kaynak.secilenMusteriId === "string"
+      ? kaynak.secilenMusteriId
+      : "";
+
+  if (
+    oncekiSecim &&
+    musteriler.some(
+      (musteri) => musteri.id === oncekiSecim
+    )
+  ) {
+    secilenMusteriId = oncekiSecim;
+  } else if (
+    !secilenMusteriId ||
+    !musteriler.some(
+      (musteri) => musteri.id === secilenMusteriId
+    )
+  ) {
+    secilenMusteriId = musteriler[0].id;
+  }
+
+  const temizVeriler = {
+    musteriler,
+    hareketler,
+    secilenMusteriId,
+    fiyatGecmisi: fiyatGecmisiniNormalizeEt(
+      kaynak.fiyatGecmisi
+    )
+  };
+
+  const mevcutPaylasilan = {
+    musteriler: cariDurum.veriler.musteriler,
+    hareketler: cariDurum.veriler.hareketler,
+    fiyatGecmisi: cariDurum.veriler.fiyatGecmisi
+  };
+
+  const yeniPaylasilan = {
+    musteriler: temizVeriler.musteriler,
+    hareketler: temizVeriler.hareketler,
+    fiyatGecmisi: temizVeriler.fiyatGecmisi
+  };
+
+  if (
+    JSON.stringify(mevcutPaylasilan) ===
+    JSON.stringify(yeniPaylasilan)
+  ) {
+    return;
+  }
+
+  cariDurum.veriler = temizVeriler;
+
+  localStorage.setItem(
+    CARI_ANAHTARI,
+    JSON.stringify(cariDurum.veriler)
+  );
+
+  cariEkraniniGoster();
 }
 
 function secilenCariMusterisi() {
@@ -856,7 +954,7 @@ cariAlanlar.secim.addEventListener(
   () => {
     cariDurum.veriler.secilenMusteriId =
       cariAlanlar.secim.value;
-    cariVerileriKaydet();
+    cariTercihiniKaydet();
     cariEkraniniGoster();
   }
 );
