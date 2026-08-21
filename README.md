@@ -1,34 +1,43 @@
+# 🥛  Süt Takip Sistemi
 
+Süt Takip Sistemi; günlük süt siparişlerini, müşteri cari hesaplarını, süt fiyatlarını ve haftalık satış verilerini takip etmek için geliştirilmiş mobil uyumlu bir web uygulamasıdır.
 
-=======
-#  Süt Takip Sistemi
+Uygulama GitHub Pages üzerinde yayınlanır. Ortak veriler Firebase Cloud Firestore üzerinde tutulur ve Firebase Authentication ile yetkili kullanıcı girişi yapılır.
 
- Süt Takip Sistemi; günlük süt siparişlerini, WhatsApp bildirimlerini ve müşteri cari hesaplarını takip etmek için geliştirilmiş mobil uyumlu bir web uygulamasıdır.
+📱 Canlı uygulama:
 
-Uygulama herhangi bir sunucu veya haricî paket gerektirmeden çalışır. Veriler kullanılan cihazın tarayıcısında saklanır.
+https://zeynepm-eren.github.io/EST/
 
-## Özellikler
+---
 
-### Sipariş takibi
+## ✨ Özellikler
+
+### 🥛 Sipariş takibi
 
 - Pazartesi–Pazar haftalık görünüm
 - Sabah ve akşam için ayrı sipariş girişi
 - Girilen süt miktarlarını otomatik toplama
 - Hatalı sipariş satırlarını gösterme
 - Günlük toplam litre hesabı
-- Haftalık toplam litre ve günlük süt grafiği
+- Haftalık toplam litre hesabı
+- Haftalık günlük süt grafiği
+- Önceki ve sonraki haftaları görüntüleme
 - Hazır WhatsApp mesajı oluşturma
 - Mesajı panoya kopyalama
-- Önceki ve sonraki haftaları görüntüleme
-- Haftalık verileri iOS Kestirmeler uygulamasına aktarma
+- Haftalık verileri kaydetme
+- Siparişleri cihazlar arasında Firebase ile senkronize etme
 
-Siparişler aşağıdaki biçimde girilebilir:
+Siparişler örneğin şu biçimde girilebilir:
 
-    Ahmet 5 L
-    Mehmet 2,5 L
-    Ayşe 10
+```text
+Ahmet 5 L
+Mehmet 2,5 L
+Ayşe 10
+```
 
-## Cari hesap
+---
+
+## 💳 Cari hesap
 
 - Müşteri bazında cari hesap takibi
 - Yeni müşteri ekleme
@@ -36,75 +45,285 @@ Siparişler aşağıdaki biçimde girilebilir:
 - Ödeme kaydetme
 - Otomatik bakiye hesaplama
 - Tarih ve açıklama ekleme
-- Haftalık süt, satış ve ödeme toplamları
+- Haftalık süt toplamı
+- Haftalık satış toplamı
+- Haftalık ödeme toplamı
 - Günlere göre cari hareket geçmişi
 - Hatalı cari hareketini silme
 - Önceki ve sonraki haftaları görüntüleme
+- Cari verileri cihazlar arasında senkronize etme
 
-## Süt fiyatı
+---
 
-Başlangıç süt fiyatı 36 TL/L olarak tanımlıdır. Cari Panel'in üstündeki fiyat düğmesinden yeni litre fiyatı ve geçerli olacağı tarih kaydedilebilir.
+## 💰 Süt fiyatı
 
-Fiyatlar tarihçeli tutulur. Örneğin 20 Ağustos'ta fiyatı 40 TL/L yaparsanız:
+Başlangıç süt fiyatı **36 TL/L** olarak tanımlıdır.
 
-- 19 Ağustos tarihli yeni bir satış 36 TL/L üzerinden hesaplanır.
-- 20 Ağustos ve sonrasındaki yeni satışlar 40 TL/L üzerinden hesaplanır.
-- Daha önce kaydedilmiş satışların tutarı ve birim fiyatı değiştirilmez.
+Cari Panel'in üst bölümündeki fiyat düğmesi kullanılarak:
 
-Her satış kaydında işlem sırasında kullanılan litre fiyatı ayrıca saklanır. Böylece fiyat daha sonra değişse bile eski cari hareketlerin tutarı korunur.
+- yeni litre fiyatı,
+- fiyatın geçerli olacağı tarih
 
-## Dosya yapısı
+kaydedilebilir.
 
-- `index.html` — Sayfanın HTML içeriği
-- `css/styles.css` — Uygulamanın görsel tasarımı
-- `js/shared.js` — Ortak sabitler, tarih ve kayıt yardımcıları
-- `js/orders.js` — Sipariş, WhatsApp ve haftalık aktarım işlemleri
-- `js/accounts.js` — Cari müşteri, süt satışı, ödeme ve bakiye işlemleri
-- `js/app.js` — Siparişler ve Cari Panel arasındaki ekran geçişleri
-- `js/firebase.js` — Firebase Authentication, Firestore senkronizasyonu ve ilk veri aktarımı
+Fiyatlar tarihçeli olarak tutulur.
 
-## Çalıştırma
+Örneğin 20 Ağustos tarihinde litre fiyatı 40 TL yapılırsa:
 
-Projeyi bilgisayarda çalıştırmak için `index.html` dosyasını bir web tarayıcısında açmak yeterlidir.
+- 19 Ağustos tarihli yeni bir satış eski fiyat üzerinden hesaplanır.
+- 20 Ağustos ve sonrasındaki satışlar 40 TL/L üzerinden hesaplanır.
+- Daha önce kaydedilmiş satışların fiyatı değiştirilmez.
 
-Haricî paket, kurulum veya derleme işlemi gerekmez.
+Her satış hareketinde işlem sırasında kullanılan litre fiyatı ayrıca saklanır. Böylece süt fiyatı daha sonra değiştirilse bile geçmiş cari hesapların tutarı korunur.
 
-GitHub Pages üzerinden yayınlandığında uygulama telefon veya bilgisayar tarayıcısından kullanılabilir.
+---
 
-## Veri saklama
+## 📊 Haftalık grafik
 
-Firebase sürümünde Firestore ortak veri kaynağı olarak kullanılır; `localStorage` ise cihazdaki yerel kopya/yedek olarak korunur. Siparişler, cari kayıtlar, fiyat geçmişi ve WhatsApp ayarları giriş yapılan cihazlar arasında senkronize edilir.
+Sipariş ekranında seçili haftanın günlük süt miktarları grafik olarak gösterilir.
 
-İlk geçişte Firestore boşsa, eski kayıtların bulunduğu cihazdan açık onayla tek seferlik aktarım yapılır. Boş bir cihazın buluttaki dolu veriyi ezmesini önlemek için otomatik ilk yükleme yapılmaz.
+Her sütun ilgili günün:
 
-İlk aktarım tamamlanana kadar eski verilerin bulunduğu cihazda tarayıcı/site verileri temizlenmemelidir.
+```text
+Sabah siparişi + Akşam siparişi
+```
 
+toplamını temsil eder.
 
-Sayfanın veya GitHub Pages içeriğinin güncellenmesi normal şartlarda kayıtları silmez. Aynı adres ve aynı tarayıcı kullanılmaya devam edildiği sürece veriler korunur.
+Ayrıca seçili haftanın toplam süt miktarı litre olarak gösterilir.
 
-Ancak aşağıdaki işlemler veri kaybına neden olabilir:
+---
 
-- Tarayıcıdaki web sitesi verilerini temizlemek
-- Gizli sekme kullanmak
-- Uygulamayı farklı bir alan adından açmak
-- Farklı bir tarayıcı veya cihaz kullanmak
-- Telefonun site verilerini depolama alanı nedeniyle temizlemesi
+## ☁️ Firebase senkronizasyonu
 
-Cari hesaplarda gerçek para kayıtları tutulacağı için düzenli yedek alınması önerilir.
+Uygulama Firebase altyapısını kullanır.
 
-## GitHub Pages
+Kullanılan servisler:
 
-Uygulamayı GitHub Pages üzerinden yayınlamak için:
+- Firebase Authentication
+- Cloud Firestore
 
-1. Projeyi GitHub deposuna gönderin.
-2. Repository ayarlarından `Settings → Pages` bölümünü açın.
-3. Yayın kaynağı olarak `main` dalını seçin.
-4. Kök klasörü `/root` olarak ayarlayın.
-5. Kaydedip GitHub Pages adresinin oluşmasını bekleyin.
+Yetkili kullanıcı Firebase Authentication ile giriş yaptıktan sonra Firestore üzerindeki ortak verilere erişebilir.
 
-Yayın dalına gönderilen yeni değişiklikler GitHub Pages sitesine otomatik olarak yansıtılır.
+Firestore aşağıdaki verilerin ortak kaynağıdır:
 
-## Kullanılan teknolojiler
+- Siparişler
+- Cari müşteriler
+- Cari hareketler
+- Süt fiyat geçmişi
+- Uygulama ayarları
+
+Bu sayede aynı hesapla giriş yapılan telefon ve bilgisayarlarda aynı veriler görüntülenebilir.
+
+---
+
+## 💾 Yerel veri ve yedekleme
+
+Firestore uygulamanın ana veri kaynağıdır.
+
+Bunun yanında tarayıcıdaki `localStorage`, cihaz üzerindeki yerel kopya/yedek olarak kullanılmaya devam eder.
+
+Kullanılan temel yerel kayıt anahtarları:
+
+```text
+sut-takip-veriler
+sut-takip-cariler
+sut-takip-ayarlar
+sut-takip-sync
+```
+
+Firebase'e ilk geçiş sırasında ayrıca eski yerel verilerin yedeği alınır.
+
+İlk Firebase kurulumu sırasında Firestore boşsa, eski verilerin bulunduğu cihazdan açık kullanıcı onayıyla tek seferlik aktarım yapılır.
+
+Boş bir cihazın buluttaki dolu veriyi yanlışlıkla ezmesini engellemek için otomatik ilk yükleme yapılmaz.
+
+---
+
+## 🔐 Güvenlik
+
+Uygulama Firebase Authentication ile kullanıcı girişi gerektirir.
+
+Firestore Security Rules ile yalnızca izin verilen Firebase kullanıcısının verileri okumasına ve değiştirmesine izin verilir.
+
+Firebase Web SDK içerisinde bulunan `firebaseConfig` bilgileri istemci uygulamasının Firebase projesine bağlanabilmesi için kullanılır.
+
+Gizli bilgiler, servis hesabı özel anahtarları veya yönetici kimlik bilgileri istemci koduna eklenmemelidir.
+
+---
+
+## 📱 Telefon kullanımı
+
+Uygulama GitHub Pages üzerinden telefondan açılabilir.
+
+Tarayıcının **Ana ekrana ekle** özelliği kullanılarak uygulama telefonun ana ekranına eklenebilir ve normal bir uygulamaya benzer şekilde kullanılabilir.
+
+Firebase sayesinde farklı cihazlarda aynı kullanıcı hesabıyla giriş yapıldığında ortak Firestore verilerine erişilir.
+
+---
+
+## 💬 WhatsApp
+
+Mevcut sürüm WhatsApp mesajını otomatik olarak göndermez.
+
+Uygulama:
+
+1. Sipariş mesajını hazırlar.
+2. WhatsApp'ı açar.
+3. Mesajı kullanıcıya hazır şekilde gösterir.
+
+Son gönderme işlemi kullanıcı tarafından yapılır.
+
+### Planlanan otomatik WhatsApp sistemi
+
+Gelecekte WhatsApp Business Platform / Cloud API kullanılarak:
+
+```text
+Belirlenen sabah saati
+        ↓
+Firestore'dan sabah siparişleri
+        ↓
+Otomatik mesaj oluşturma
+        ↓
+WhatsApp Cloud API
+        ↓
+Belirlenen telefona otomatik gönderim
+```
+
+ve aynı işlemin akşam siparişleri için de yapılması planlanmaktadır.
+
+Bu sistem için Firebase Cloud Functions ve zamanlanmış görevler kullanılabilir.
+
+---
+
+## 📁 Dosya yapısı
+
+```text
+EST/
+│
+├── index.html
+│
+├── README.md
+│
+├── css/
+│   └── styles.css
+│
+└── js/
+    ├── shared.js
+    ├── orders.js
+    ├── accounts.js
+    ├── app.js
+    └── firebase.js
+```
+
+### Dosyaların görevleri
+
+`index.html`
+
+Uygulamanın HTML arayüzü.
+
+`css/styles.css`
+
+Uygulamanın mobil ve masaüstü tasarımı.
+
+`js/shared.js`
+
+Ortak sabitler, tarih işlemleri ve kayıt yardımcıları.
+
+`js/orders.js`
+
+Sipariş işlemleri, toplam hesapları, grafik ve WhatsApp mesajları.
+
+`js/accounts.js`
+
+Cari müşteriler, süt satışları, ödemeler, bakiye ve süt fiyatları.
+
+`js/app.js`
+
+Sipariş ve Cari Panel ekranları arasındaki geçişler.
+
+`js/firebase.js`
+
+Firebase Authentication, Firestore senkronizasyonu ve ilk veri aktarımı.
+
+---
+
+## 💻 Yerelde çalıştırma
+
+Firebase kullanılan sürümü doğrudan `index.html` dosyasına çift tıklayarak açmak yerine yerel bir HTTP sunucusu üzerinden çalıştırmak önerilir.
+
+Python yüklüyse proje klasöründe:
+
+```bash
+python -m http.server 8000
+```
+
+komutu çalıştırılabilir.
+
+Daha sonra:
+
+```text
+http://localhost:8000
+```
+
+adresinden uygulama açılır.
+
+---
+
+## 🌐 GitHub Pages
+
+Uygulama GitHub Pages üzerinden ücretsiz olarak yayınlanmaktadır.
+
+Yayın ayarları:
+
+```text
+Repository:
+zeynepm-eren/EST
+
+Branch:
+main
+
+Folder:
+/(root)
+```
+
+GitHub üzerinde:
+
+```text
+Settings → Pages
+```
+
+bölümünden yayın ayarları yönetilebilir.
+
+`main` branch'ine gönderilen güncellemeler GitHub Pages tarafından yeniden yayınlanır.
+
+---
+
+## 🏗️ Sistem mimarisi
+
+```text
+Telefon / Bilgisayar
+        │
+        ▼
+GitHub Pages
+HTML + CSS + JavaScript
+        │
+        ├──── Firebase Authentication
+        │
+        ▼
+Cloud Firestore
+        │
+        ▼
+Ortak sipariş ve cari verileri
+```
+
+GitHub Pages uygulamanın arayüz dosyalarını yayınlar.
+
+Firebase ise kullanıcı doğrulaması ve ortak veritabanı görevlerini gerçekleştirir.
+
+---
+
+## 🛠️ Kullanılan teknolojiler
 
 - HTML5
 - CSS3
@@ -112,18 +331,31 @@ Yayın dalına gönderilen yeni değişiklikler GitHub Pages sitesine otomatik o
 - Web Storage API
 - Firebase Authentication
 - Cloud Firestore
-- WhatsApp `wa.me` bağlantıları
-- iOS Shortcuts bağlantısı
+- Firebase Web SDK
+- GitHub Pages
+- WhatsApp `wa.me`
+- Git
+- GitHub
 
-## Planlanan geliştirmeler
+---
 
-- Verileri dosyaya yedekleme
+## 🚀 Planlanan geliştirmeler
+
+- Sabah ve akşam siparişlerini belirlenen saatlerde otomatik WhatsApp mesajı olarak gönderme
+- WhatsApp Business Cloud API entegrasyonu
+- Verileri JSON dosyasına yedekleme
 - Yedekten geri yükleme
 - Siparişleri tek tuşla cari hesaba aktarma
-- Cari hareketlerini düzenleme ve geri alma
-- Aylık raporlar
-- Cari ekstresini WhatsApp veya PDF olarak paylaşma
+- Cari hareketlerini düzenleme
+- İşlem geri alma
+- Aylık satış raporları
+- Aylık süt miktarı grafikleri
+- Cari ekstresini PDF olarak oluşturma
+- Cari ekstresini WhatsApp üzerinden paylaşma
+- Daha gelişmiş kullanıcı ve yetki sistemi
 
-## Lisans
+---
+
+## 📄 Lisans
 
 Bu proje kişisel kullanım amacıyla geliştirilmiştir.
