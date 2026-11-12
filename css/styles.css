@@ -2108,3 +2108,53 @@ button.bakiye-alani {
 .ekstre-filtre {
   padding-bottom: 2px;
 }
+
+/* Hesap dökümü: silme düğmesi tarihin solunda */
+.ekstre-satiri {
+  grid-template-columns: 32px 40px minmax(0, 1fr) auto;
+}
+
+/* Dönem düğmeleri hiçbir ekranda kesilmesin: kaydırma yerine alt satıra geçsin */
+.ekstre-filtre {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.ekstre-filtre-buton {
+  min-height: 38px;
+  line-height: 1.2;
+}
+
+@media (max-width: 440px) {
+  .ekstre-satiri {
+    grid-template-columns: 30px 34px minmax(0, 1fr) auto;
+  }
+}
+
+/* Siparişler: yazarken isim önerileri */
+.isim-onerileri {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.isim-onerileri.gizli {
+  display: none;
+}
+
+.isim-onerisi {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--yesil);
+  border-radius: 999px;
+  background: var(--acik-yesil);
+  color: var(--yesil);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.isim-onerisi:active {
+  background: var(--yesil);
+  color: white;
+}

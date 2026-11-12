@@ -1362,11 +1362,12 @@ function ekstreyiGoster() {
     tutarAlani.appendChild(tutar);
     tutarAlani.appendChild(kalan);
 
-    satir.appendChild(tarihAlani);
-    satir.appendChild(bilgi);
-    satir.appendChild(tutarAlani);
-
-    if (!silinmis) {
+    // Silme düğmesi tarihin solunda; silinmiş müşteride boş yer tutucu.
+    if (silinmis) {
+      const bosluk = document.createElement("span");
+      bosluk.setAttribute("aria-hidden", "true");
+      satir.appendChild(bosluk);
+    } else {
       const sil = document.createElement("button");
       sil.type = "button";
       sil.className = "hareket-sil";
@@ -1376,6 +1377,10 @@ function ekstreyiGoster() {
       sil.addEventListener("click", () => cariHareketSil(hareket.id));
       satir.appendChild(sil);
     }
+
+    satir.appendChild(tarihAlani);
+    satir.appendChild(bilgi);
+    satir.appendChild(tutarAlani);
 
     cariAlanlar.ekstreListesi.appendChild(satir);
   });
