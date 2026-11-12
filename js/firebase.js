@@ -322,6 +322,11 @@ function bulutVerisiniUygula(tur, veri) {
 
   if (tur === "ayarlar") {
     ayarlariUygula(veri || {});
+    return;
+  }
+
+  if (tur === "inekler" && typeof inekVerileriniUygula === "function") {
+    inekVerileriniUygula(veri || {});
   }
 }
 
@@ -334,6 +339,10 @@ function yereldenOku(tur) {
     return kayitOku(CARI_ANAHTARI, {});
   }
 
+  if (tur === "inekler") {
+    return kayitOku(INEK_ANAHTARI, {});
+  }
+
   return kayitOku(AYAR_ANAHTARI, {});
 }
 
@@ -341,7 +350,7 @@ function yereldenOku(tur) {
 async function bekleyenYazmalariTamamla() {
   const isaretler = bekleyenIsaretleri();
 
-  for (const tur of ["siparisler", "cariler", "ayarlar"]) {
+  for (const tur of ["siparisler", "cariler", "ayarlar", "inekler"]) {
     const zaman = Number(isaretler[tur]);
 
     if (!zaman) {
@@ -375,7 +384,8 @@ async function ilkBulutVerileriniIndir() {
   const turler = [
     "siparisler",
     "cariler",
-    "ayarlar"
+    "ayarlar",
+    "inekler"
   ];
 
   const sonuc = await Promise.all(
@@ -402,7 +412,7 @@ async function ilkBulutVerileriniIndir() {
 function gercekZamanliDinlemeyiBaslat() {
   dinleyicileriDurdur();
 
-  ["siparisler", "cariler", "ayarlar"]
+  ["siparisler", "cariler", "ayarlar", "inekler"]
     .forEach(
       (tur) => {
         const iptal = belge(tur).onSnapshot(
@@ -531,16 +541,20 @@ async function belgeyeYaz(tur, kopya) {
   const zaman =
     firebase.firestore.FieldValue.serverTimestamp();
 
-  if (
-    tur === "cariler" &&
-    typeof cariBirlestir === "function"
-  ) {
+  const birlestirici =
+    tur === "cariler" && typeof cariBirlestir === "function"
+      ? cariBirlestir
+      : tur === "inekler" && typeof inekBirlestir === "function"
+        ? inekBirlestir
+        : null;
+
+  if (birlestirici) {
     return db.runTransaction(async (islem) => {
       const snapshot = await islem.get(ref);
       const sunucu = snapshot.exists
         ? (snapshot.data() || {}).value
         : {};
-      const birlesik = cariBirlestir(sunucu, kopya);
+      const birlesik = birlestirici(sunucu, kopya);
 
       islem.set(
         ref,
@@ -593,7 +607,7 @@ async function bekleyeniGonder(tur) {
 
       // Birleştirme başka cihazdan gelen kayıtları da içerebilir;
       // ekranı buluttaki son hâle getir.
-      if (tur === "cariler") {
+      if (tur === "cariler" || tur === "inekler") {
         bulutVerisiniUygula(tur, yazilan);
       }
     }

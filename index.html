@@ -14,7 +14,7 @@
 
   <title>Eren Süt Takip</title>
 
-  <link rel="stylesheet" href="css/styles.css?v=20261112e" />
+  <link rel="stylesheet" href="css/styles.css?v=20261112f" />
 </head>
 
 <body>
@@ -89,7 +89,12 @@
       </div>
     </header>
 
-    <nav class="ana-sekmeler" aria-label="Uygulama bölümleri">
+    <div class="bolum-secici" aria-label="Bölüm seçimi">
+      <button class="bolum-buton aktif" data-bolum="sut" type="button">🥛 Süt Takip</button>
+      <button class="bolum-buton" data-bolum="inek" type="button">🐄 İnek Takip</button>
+    </div>
+
+    <nav id="sutSekmeleri" class="ana-sekmeler" aria-label="Süt Takip sekmeleri">
       <button
         class="sekme-buton aktif"
         data-panel="siparisPaneli"
@@ -113,6 +118,11 @@
       >
         👥 Müşteriler
       </button>
+    </nav>
+
+    <nav id="inekSekmeleri" class="ana-sekmeler inek-sekmeleri gizli" aria-label="İnek Takip sekmeleri">
+      <button class="sekme-buton aktif" data-panel="inekYapilacakPaneli" type="button">📋 Yapılacaklar</button>
+      <button class="sekme-buton" data-panel="inekSuruPaneli" type="button">🐄 Sürü</button>
     </nav>
 
     <section id="siparisPaneli" class="ana-panel aktif-panel">
@@ -498,6 +508,80 @@
         <div id="silinenMusteriler" class="musteri-listesi"></div>
       </details>
     </section>
+
+    <!-- ===== İnek Takip: Yapılacaklar ===== -->
+    <section id="inekYapilacakPaneli" class="ana-panel">
+      <div class="inek-sayilar">
+        <div class="inek-sayi"><strong id="inekSayiToplam">0</strong><small>hayvan</small></div>
+        <div class="inek-sayi"><strong id="inekSayiBekleyen" class="turuncu">0</strong><small>sonuç bekliyor</small></div>
+        <div class="inek-sayi"><strong id="inekSayiYakin" class="mavi">0</strong><small>kontrol yakın</small></div>
+      </div>
+
+      <section id="inekGecikenler" class="inek-geciken gizli">
+        <strong>Gecikenler</strong>
+        <div id="inekGecikenListesi"></div>
+      </section>
+
+      <section class="kart">
+        <div class="inek-kart-baslik">
+          <h2>Önümüzdeki 30 gün</h2>
+          <span id="inekYaklasanSayisi"></span>
+        </div>
+        <div id="inekYaklasanListesi"></div>
+      </section>
+
+      <section class="kart">
+        <div class="inek-kart-baslik">
+          <h2>Beklenen doğumlar</h2>
+          <span>60 gün</span>
+        </div>
+        <div id="inekDogumListesi"></div>
+      </section>
+
+      <p class="kayit-bilgisi">
+        Tarihler otomatik hesaplanır: kontrol +35 gün, doğum +283 gün,
+        kuruya çıkarma doğumdan 60 gün önce.
+      </p>
+    </section>
+
+    <!-- ===== İnek Takip: Sürü ===== -->
+    <section id="inekSuruPaneli" class="ana-panel">
+      <section class="kart inek-suru-karti">
+        <div class="inek-kart-baslik">
+          <h2>Sürü <span id="inekSuruSayisi" class="musteri-sayisi"></span></h2>
+          <button id="hayvanEkleButonu" class="musteri-ekle-buton" type="button">+ Hayvan ekle</button>
+        </div>
+
+        <input
+          id="inekArama"
+          class="inek-arama"
+          type="search"
+          placeholder="Ad veya küpe no ara"
+          aria-label="Hayvan ara"
+          autocomplete="off"
+        />
+
+        <div id="inekFiltreleri" class="ekstre-filtre inek-filtreleri"></div>
+
+        <div id="inekListesi"></div>
+      </section>
+
+      <details id="silinenHayvanKutusu" class="silinen-musteriler gizli">
+        <summary>Silinen hayvanlar (<span id="silinenHayvanSayisi">0</span>)</summary>
+        <div id="silinenHayvanlar" class="musteri-listesi"></div>
+      </details>
+
+      <section class="kart inek-aktar-karti">
+        <h2>Excel çizelgesinden aktar</h2>
+        <p class="musteri-yardim">
+          Excel'de "Dosya → Farklı Kaydet → CSV" ile kaydettiğin çizelgeyi seç.
+          Küpe numarası zaten kayıtlı olan hayvanlar atlanır, mevcut kayıtlar değişmez.
+        </p>
+        <label class="inek-aktar-buton" for="inekCsvDosyasi">CSV dosyası seç</label>
+        <input id="inekCsvDosyasi" class="gizli" type="file" accept=".csv,text/csv" />
+        <p id="inekAktarSonucu" class="musteri-yardim"></p>
+      </section>
+    </section>
   </div>
 
   <dialog id="fiyatPenceresi">
@@ -697,6 +781,177 @@
     </form>
   </dialog>
 
+  <!-- ===== İnek Takip pencereleri ===== -->
+  <dialog id="hayvanDetayPenceresi" class="inek-penceresi">
+    <div class="ayarlar inek-detay">
+      <div class="ayar-baslik">
+        <div>
+          <p id="hayvanDetayUst" class="ust-yazi"></p>
+          <h2 id="hayvanDetayAd"></h2>
+        </div>
+        <button id="hayvanDetayKapat" class="ikon-buton" type="button" aria-label="Kapat">✕</button>
+      </div>
+
+      <div id="hayvanDurumKarti" class="hayvan-durum"></div>
+
+      <div id="gebelikSonucuAlani" class="kart-ic gizli">
+        <strong>Gebelik kontrolü sonucu</strong>
+        <p id="gebelikSonucuSoru" class="musteri-yardim"></p>
+        <div class="uclu-secim">
+          <button class="secim-buton" data-gebelik="gebe" type="button">Gebe</button>
+          <button class="secim-buton" data-gebelik="bos" type="button">Boş</button>
+          <button class="secim-buton" data-gebelik="bekliyor" type="button">Bekliyor</button>
+        </div>
+      </div>
+
+      <div id="donemAlani" class="kart-ic gizli">
+        <div class="inek-kart-baslik"><strong>Bu dönem</strong><span>tarihler otomatik</span></div>
+        <div id="donemAdimlari"></div>
+      </div>
+
+      <div id="disiIslemleri" class="ikili-buton">
+        <button id="tohumlamaEkleButonu" class="ikinci-buton" type="button">+ Tohumlama</button>
+        <button id="dogumEkleButonu" class="ana-buton" type="button">+ Doğum kaydı</button>
+      </div>
+
+      <div class="kart-ic">
+        <strong>Geçmiş</strong>
+        <div id="hayvanGecmisi"></div>
+      </div>
+
+      <div class="kart-ic">
+        <strong>Bilgiler</strong>
+        <div id="hayvanBilgileri"></div>
+      </div>
+
+      <div class="ikili-buton">
+        <button id="hayvanDuzenleButonu" class="ikinci-buton" type="button">Bilgileri düzenle</button>
+        <button id="hayvanSilButonu" class="sil-buton" type="button">Hayvanı sil</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="tohumlamaPenceresi">
+    <form method="dialog" class="ayarlar">
+      <div class="ayar-baslik">
+        <h2>Tohumlama ekle</h2>
+        <button class="ikon-buton" value="cancel" aria-label="Kapat">✕</button>
+      </div>
+      <p id="tohumlamaHayvan" class="yardim"></p>
+      <label for="tohumlamaTarihi">Tohumlama tarihi</label>
+      <input id="tohumlamaTarihi" type="date" />
+      <label for="tohumlamaBoga">Sperma / boğa kodu</label>
+      <input id="tohumlamaBoga" type="text" placeholder="İsteğe bağlı" autocomplete="off" />
+      <div id="tohumlamaOnizleme" class="tarih-onizleme"></div>
+      <button id="tohumlamaKaydet" class="ana-buton" type="button">Tohumlamayı kaydet</button>
+    </form>
+  </dialog>
+
+  <dialog id="dogumPenceresi" class="inek-penceresi">
+    <form method="dialog" class="ayarlar">
+      <div class="ayar-baslik">
+        <div>
+          <p class="ust-yazi">Doğum kaydı</p>
+          <h2 id="dogumHayvan"></h2>
+        </div>
+        <button class="ikon-buton" value="cancel" aria-label="Kapat">✕</button>
+      </div>
+      <p id="dogumTahmini" class="yardim"></p>
+
+      <label for="dogumTarihi">Doğum tarihi</label>
+      <input id="dogumTarihi" type="date" />
+
+      <label class="anahtar-satir" for="dogumIkiz">
+        <span>İkiz doğum</span>
+        <input id="dogumIkiz" type="checkbox" />
+      </label>
+
+      <div class="buzagi-kutusu">
+        <strong id="buzagi1Baslik">Buzağı</strong>
+        <div class="ikili-secim">
+          <button class="secim-buton aktif" data-buzagi="1" data-cinsiyet="disi" type="button">♀ Dişi</button>
+          <button class="secim-buton" data-buzagi="1" data-cinsiyet="erkek" type="button">♂ Erkek</button>
+        </div>
+        <label for="buzagi1Kupe">Küpe no <small class="kupe-notu"></small></label>
+        <input id="buzagi1Kupe" type="text" placeholder="Örn. TR2026…" autocomplete="off" />
+      </div>
+
+      <div id="buzagi2Kutusu" class="buzagi-kutusu gizli">
+        <strong>2. buzağı</strong>
+        <div class="ikili-secim">
+          <button class="secim-buton" data-buzagi="2" data-cinsiyet="disi" type="button">♀ Dişi</button>
+          <button class="secim-buton aktif" data-buzagi="2" data-cinsiyet="erkek" type="button">♂ Erkek</button>
+        </div>
+        <label for="buzagi2Kupe">Küpe no <small class="kupe-notu"></small></label>
+        <input id="buzagi2Kupe" type="text" placeholder="Örn. TR2026…" autocomplete="off" />
+      </div>
+
+      <label class="anahtar-satir" for="dogumSuruyeEkle">
+        <span id="dogumSuruyeEkleMetni">Buzağıyı sürüye ayrı hayvan olarak ekle</span>
+        <input id="dogumSuruyeEkle" type="checkbox" checked />
+      </label>
+
+      <label for="dogumNot">Not</label>
+      <input id="dogumNot" type="text" placeholder="Örn. kolay doğum" autocomplete="off" />
+
+      <p id="dogumBilgi" class="yardim"></p>
+      <button id="dogumKaydet" class="ana-buton" type="button">Doğumu kaydet</button>
+    </form>
+  </dialog>
+
+  <dialog id="hayvanPenceresi" class="inek-penceresi">
+    <form method="dialog" class="ayarlar">
+      <div class="ayar-baslik">
+        <h2 id="hayvanPenceresiBaslik">Yeni hayvan</h2>
+        <button class="ikon-buton" value="cancel" aria-label="Kapat">✕</button>
+      </div>
+
+      <label for="hayvanKupe">Küpe no</label>
+      <input id="hayvanKupe" type="text" placeholder="Örn. Tr201700541" autocomplete="off" />
+
+      <label for="hayvanAd">Adı</label>
+      <input id="hayvanAd" type="text" placeholder="Örn. Goca kız" autocomplete="off" />
+
+      <label>Cinsiyet</label>
+      <div class="ikili-secim">
+        <button class="secim-buton aktif" data-hayvan-cinsiyet="disi" type="button">♀ Dişi</button>
+        <button class="secim-buton" data-hayvan-cinsiyet="erkek" type="button">♂ Erkek</button>
+      </div>
+
+      <label for="hayvanIrk">Irk</label>
+      <input id="hayvanIrk" type="text" list="irkListesi" placeholder="Örn. Holstein" autocomplete="off" />
+      <datalist id="irkListesi">
+        <option value="Holstein"></option>
+        <option value="Simental"></option>
+        <option value="Akbaş"></option>
+        <option value="Montofon"></option>
+        <option value="Jersey"></option>
+      </datalist>
+
+      <label for="hayvanDogumTarihi">Doğum tarihi (hayvanın, isteğe bağlı)</label>
+      <input id="hayvanDogumTarihi" type="date" />
+
+      <div id="hayvanUremeAlani" class="kart-ic">
+        <strong>Üreme bilgileri</strong>
+        <p class="musteri-yardim">Biliyorsan doldur, sonra da eklenebilir.</p>
+        <label for="hayvanSonDogum">Son doğum tarihi</label>
+        <input id="hayvanSonDogum" type="date" />
+        <div id="hayvanTohumlamaAlani">
+          <label for="hayvanTohumlama">Son tohumlama tarihi</label>
+          <input id="hayvanTohumlama" type="date" />
+          <label for="hayvanBoga">Sperma / boğa kodu</label>
+          <input id="hayvanBoga" type="text" placeholder="İsteğe bağlı" autocomplete="off" />
+          <div id="hayvanOnizleme" class="tarih-onizleme"></div>
+        </div>
+      </div>
+
+      <label for="hayvanNot">Not</label>
+      <input id="hayvanNot" type="text" placeholder="İsteğe bağlı" autocomplete="off" />
+
+      <button id="hayvanKaydet" class="ana-buton" type="button">Kaydet</button>
+    </form>
+  </dialog>
+
   <dialog id="ayarPenceresi">
     <form method="dialog" class="ayarlar">
       <div class="ayar-baslik">
@@ -730,10 +985,11 @@
 
   <div id="bildirim" class="bildirim"></div>
 
-  <script src="js/shared.js?v=20261112e" defer></script>
-  <script src="js/orders.js?v=20261112e" defer></script>
-  <script src="js/accounts.js?v=20261112e" defer></script>
-  <script src="js/app.js?v=20261112e" defer></script>
+  <script src="js/shared.js?v=20261112f" defer></script>
+  <script src="js/orders.js?v=20261112f" defer></script>
+  <script src="js/accounts.js?v=20261112f" defer></script>
+  <script src="js/inekler.js?v=20261112f" defer></script>
+  <script src="js/app.js?v=20261112f" defer></script>
 
   <script
     src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"
@@ -747,6 +1003,6 @@
     src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"
     defer
   ></script>
-  <script src="js/firebase.js?v=20261112e" defer></script>
+  <script src="js/firebase.js?v=20261112f" defer></script>
 </body>
 </html>
