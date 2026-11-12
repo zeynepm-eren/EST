@@ -1,6 +1,6 @@
 "use strict";
 
-// Uygulamanın ana Siparişler / Cari Panel geçişi.
+// Uygulamanın ana sekmeleri: Siparişler / İşlem / Müşteriler.
 
 document
   .querySelectorAll("[data-panel]")
@@ -31,8 +31,8 @@ document
             );
 
           if (
-            buton.dataset.panel ===
-            "cariPaneli"
+            buton.dataset.panel === "islemPaneli" ||
+            buton.dataset.panel === "musteriPaneli"
           ) {
             cariEkraniniGoster();
           }

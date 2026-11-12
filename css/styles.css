@@ -1787,3 +1787,268 @@ button.bakiye-alani {
     padding: 10px 8px;
   }
 }
+
+/* Hesap dökümünü WhatsApp'tan gönderme */
+.whatsapp-buton {
+  min-height: 49px;
+  padding: 10px 13px;
+  border: 1px solid #1a9e55;
+  border-radius: 14px;
+  background: #25d366;
+  color: #063d1f;
+  font-weight: 900;
+}
+
+.ekstre-paylas {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.ekstre-paylas + .ekstre-butonlar {
+  margin-top: 8px;
+}
+
+.paylas-penceresi {
+  width: min(calc(100% - 20px), 520px);
+  max-height: calc(100dvh - 24px);
+}
+
+.paylas-yardim {
+  margin-top: 6px;
+}
+
+.paylas-donemleri {
+  margin-top: 0;
+}
+
+.paylas-tarihler {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.paylas-tarihler.gizli {
+  display: none;
+}
+
+.paylas-tarihler > div {
+  min-width: 0;
+}
+
+.paylas-tarihler label {
+  margin-top: 4px;
+}
+
+.ayarlar .paylas-tarihler input {
+  min-width: 0;
+  padding: 10px 8px;
+}
+
+.paylas-mesaj {
+  min-height: 240px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.paylas .ekstre-butonlar .whatsapp-buton {
+  width: 100%;
+}
+
+/* ===== Üç sekme: Siparişler / İşlem / Müşteriler ===== */
+.ana-sekmeler {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sekme-buton {
+  padding: 0 4px;
+  font-size: 14px;
+}
+
+.gorunmez {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.cari-ust > label {
+  display: block;
+  margin-bottom: 6px;
+  color: #ccfbf1;
+}
+
+.cari-ust-alt {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.cari-ust-alt button.bakiye-alani {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.cari-ust-alt .bakiye-alani strong {
+  font-size: 26px;
+}
+
+.cari-ust-alt .bakiye-dokum-yazi {
+  margin-top: 2px;
+}
+
+.cari-ust-alt .cari-fiyat-buton {
+  flex-shrink: 0;
+}
+
+.islem-karti .islem-sekmeleri {
+  margin-bottom: 14px;
+}
+
+.son-alim-notu {
+  min-height: 16px;
+  margin: 8px 2px 0;
+  color: var(--soluk);
+  font-size: 12px;
+}
+
+.tarih-not-satiri {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.tarih-not-satiri input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 10px;
+  border: 1px solid var(--kenar);
+  border-radius: 14px;
+  background: #fcfefd;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.not-ekle-buton {
+  width: 100%;
+  min-height: 46px;
+  border: 1px dashed #b9cbc5;
+  border-radius: 14px;
+  background: white;
+  color: var(--soluk);
+  font-weight: 800;
+}
+
+#notAlani {
+  margin-top: 10px;
+}
+
+.cari-kaydet:disabled {
+  border-color: var(--kenar);
+  background: var(--kenar);
+  color: var(--soluk);
+}
+
+.bugun-baslik {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.bugun-baslik h2 {
+  font-size: 17px;
+}
+
+.bugun-baslik span {
+  color: var(--soluk);
+  font-size: 12px;
+}
+
+.bugun-karti .hareket-satiri:last-child {
+  border-bottom: none;
+}
+
+.alacak-karti span,
+.alacak-karti strong,
+.alacak-karti small {
+  display: block;
+}
+
+.alacak-karti span,
+.alacak-karti small {
+  color: #ccfbf1;
+  font-size: 12px;
+}
+
+.alacak-karti strong {
+  margin: 2px 0 4px;
+  font-size: 30px;
+}
+
+.musteri-karti {
+  padding: 14px 0 0;
+}
+
+.musteri-araclari {
+  grid-template-columns: 1fr auto;
+}
+
+.siralama {
+  margin: 12px 16px 6px;
+}
+
+.musteri-listesi {
+  max-height: none;
+}
+
+.musteri-satir-buton {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #edf2f0;
+  background: transparent;
+  color: var(--yazi);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.musteri-satir-buton:focus-visible {
+  outline: 2px solid var(--yesil);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.musteri-satir-buton .musteri-ad-buton strong {
+  text-decoration: none;
+}
+
+.musteri-ok {
+  color: #9fb2ac;
+  font-size: 20px;
+}
+
+#musteriPaneli > .silinen-musteriler {
+  margin: 0 0 16px;
+}
+
+@media (max-width: 440px) {
+  .musteri-araclari {
+    grid-template-columns: 1fr auto;
+  }
+
+  .sekme-buton {
+    font-size: 13px;
+  }
+}
