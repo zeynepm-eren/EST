@@ -100,10 +100,18 @@
 
       <button
         class="sekme-buton"
-        data-panel="cariPaneli"
+        data-panel="islemPaneli"
         type="button"
       >
-        💳 Cari Panel
+        ✍️ İşlem
+      </button>
+
+      <button
+        class="sekme-buton"
+        data-panel="musteriPaneli"
+        type="button"
+      >
+        👥 Müşteriler
       </button>
     </nav>
 
@@ -238,169 +246,64 @@
     </p>
     </section>
 
-    <section id="cariPaneli" class="ana-panel">
+    <section id="islemPaneli" class="ana-panel">
       <section class="cari-ust">
-        <div class="cari-ust-baslik">
-          <div>
-            <p class="ust-yazi cari-ust-yazi">Cari hesap</p>
-            <h2>Müşteri hesabı</h2>
-          </div>
+        <label for="cariSecimi">Müşteri</label>
+        <div class="cari-secim-satiri">
+          <select id="cariSecimi" aria-label="Müşteri seçimi"></select>
+          <button
+            id="yeniCari"
+            class="cari-yeni-buton"
+            type="button"
+            aria-label="Yeni müşteri ekle"
+            title="Yeni müşteri ekle"
+          >+</button>
+        </div>
+
+        <div class="cari-ust-alt">
+          <button
+            id="bakiyeAlani"
+            class="bakiye-alani"
+            type="button"
+            title="Hesap dökümünü aç"
+          >
+            <span id="bakiyeAciklamasi">Güncel bakiye</span>
+            <strong id="cariBakiye">0 TL</strong>
+            <small class="bakiye-dokum-yazi">Hesap dökümü ›</small>
+          </button>
+
           <button
             id="fiyatDegistirButonu"
             class="cari-fiyat-etiketi cari-fiyat-buton"
             type="button"
             title="Süt litre fiyatını değiştir"
           >
-            <span id="cariGuncelFiyat">36 TL / L</span>
-            <small>değiştir</small>
+            <span id="cariGuncelFiyat">Süt 36 TL / L</span>
+            <small>fiyatı değiştir</small>
           </button>
-        </div>
-
-        <div class="cari-secim-grubu">
-          <label for="cariSecimi">Müşteri</label>
-          <div class="cari-secim-satiri">
-            <select id="cariSecimi" aria-label="Cari müşteri seçimi"></select>
-            <button
-              id="yeniCari"
-              class="cari-yeni-buton"
-              type="button"
-              aria-label="Yeni cari ekle"
-              title="Yeni cari ekle"
-            >+</button>
-          </div>
-        </div>
-
-        <button
-          id="bakiyeAlani"
-          class="bakiye-alani"
-          type="button"
-          title="Hesap dökümünü aç"
-        >
-          <span id="bakiyeAciklamasi">Güncel bakiye</span>
-          <strong id="cariBakiye">0 TL</strong>
-          <small class="bakiye-dokum-yazi">Hesap dökümünü gör ›</small>
-        </button>
-      </section>
-
-      <details id="musteriKarti" class="kart musteri-karti" open>
-        <summary class="musteri-karti-baslik">
-          <div>
-            <p class="ust-yazi">Müşteriler</p>
-            <h2>
-              Müşteri listesi
-              <span id="musteriSayisi" class="musteri-sayisi"></span>
-            </h2>
-          </div>
-          <span class="ac-kapa" aria-hidden="true">⌄</span>
-        </summary>
-
-        <div class="musteri-araclari">
-          <input
-            id="musteriArama"
-            type="search"
-            placeholder="Müşteri ara"
-            aria-label="Müşteri ara"
-            autocomplete="off"
-          />
-          <button
-            id="musteriEkleButonu"
-            class="musteri-ekle-buton"
-            type="button"
-          >+ Müşteri ekle</button>
-        </div>
-
-        <p class="musteri-yardim">
-          Alım ve ödeme geçmişini görmek için müşterinin adına dokun.
-        </p>
-
-        <div id="musteriListesi" class="musteri-listesi"></div>
-
-        <details id="silinenMusteriKutusu" class="silinen-musteriler gizli">
-          <summary>
-            Silinen müşteriler (<span id="silinenMusteriSayisi">0</span>)
-          </summary>
-          <p class="musteri-yardim">
-            Silinen müşterilerin geçmiş kayıtları saklanır. Geri aldığında
-            hesabı olduğu gibi geri gelir.
-          </p>
-          <div id="silinenMusteriler" class="musteri-listesi"></div>
-        </details>
-      </details>
-
-      <section class="cari-hafta">
-        <div class="cari-hafta-gecis">
-          <button
-            id="cariOncekiHafta"
-            class="hafta-ok"
-            type="button"
-            aria-label="Önceki cari haftası"
-          >‹</button>
-
-          <button
-            id="cariBuHafta"
-            class="cari-hafta-baslik"
-            type="button"
-          >
-            <strong id="cariHaftaAraligi"></strong>
-            <span>Bu haftaya dön</span>
-          </button>
-
-          <button
-            id="cariSonrakiHafta"
-            class="hafta-ok"
-            type="button"
-            aria-label="Sonraki cari haftası"
-          >›</button>
-        </div>
-
-        <div class="hafta-ozeti">
-          <div class="hafta-ozet-kutu">
-            <span>Süt</span>
-            <strong id="cariHaftaLitre">0 L</strong>
-          </div>
-          <div class="hafta-ozet-kutu">
-            <span>Bal</span>
-            <strong id="cariHaftaBal">0 TL</strong>
-          </div>
-          <div class="hafta-ozet-kutu">
-            <span>Toplam satış</span>
-            <strong id="cariHaftaSatis">0 TL</strong>
-          </div>
-          <div class="hafta-ozet-kutu">
-            <span>Ödeme</span>
-            <strong id="cariHaftaOdeme">0 TL</strong>
-          </div>
         </div>
       </section>
 
-      <section class="kart">
-        <div class="kart-baslik">
-          <div>
-            <p class="ust-yazi">Yeni hareket</p>
-            <h2 id="islemBasligi">Süt satışı ekle</h2>
-          </div>
-          <div id="cariKartFiyat" class="toplam">36 TL/L</div>
-        </div>
+      <section class="kart islem-karti">
+        <h2 id="islemBasligi" class="gorunmez">Süt satışı ekle</h2>
 
         <div class="islem-sekmeleri">
           <button
             class="islem-tur-buton aktif"
             data-islem-turu="satis"
             type="button"
-          >🥛 Süt Satışı</button>
+          >🥛 Süt</button>
           <button
             class="islem-tur-buton"
             data-islem-turu="bal"
             type="button"
-          >🍯 Bal Satışı</button>
+          >🍯 Bal</button>
           <button
             class="islem-tur-buton"
             data-islem-turu="odeme"
             type="button"
           >💵 Ödeme</button>
         </div>
-
-        <p id="islemMusteriNotu" class="islem-musteri-notu"></p>
 
         <div id="satisGirdileri">
           <label class="form-etiket" for="cariLitre">Litre</label>
@@ -419,10 +322,12 @@
             </div>
 
             <div class="tutar-onizleme">
-              <small>Hesaplanan tutar</small>
+              <small>Tutar</small>
               <strong id="cariTutar">0 TL</strong>
             </div>
           </div>
+
+          <p id="sonAlimNotu" class="son-alim-notu"></p>
 
           <div class="hizli-butonlar">
             <button class="litre-buton eksi" data-litre="-2" type="button">−2 L</button>
@@ -469,36 +374,86 @@
           </div>
         </div>
 
-        <div class="cari-form-grid">
+        <div class="tarih-not-satiri">
           <div class="cari-form-alani">
             <label class="form-etiket" for="cariTarih">Tarih</label>
             <input id="cariTarih" type="date" />
           </div>
 
-          <div class="cari-form-alani tam-satir">
-            <label class="form-etiket" for="cariAciklama">Açıklama</label>
-            <textarea
-              id="cariAciklama"
-              placeholder="Örn. Kapıya bırakıldı veya elden ödeme"
-            ></textarea>
+          <div class="cari-form-alani">
+            <span class="form-etiket">Not</span>
+            <button id="notEkleButonu" class="not-ekle-buton" type="button">+ Not ekle</button>
           </div>
         </div>
 
+        <div id="notAlani" class="cari-form-alani gizli">
+          <label class="form-etiket" for="cariAciklama">Not</label>
+          <textarea
+            id="cariAciklama"
+            placeholder="Örn. Kapıya bırakıldı veya elden ödeme"
+          ></textarea>
+        </div>
+
         <button id="cariKaydet" class="ana-buton cari-kaydet" type="button">
-          Cari hesaba işle
+          Hesaba işle
         </button>
       </section>
 
-      <div class="hareket-baslik">
-        <h2>Haftanın hareketleri</h2>
-        <span id="hareketHaftaEtiketi"></span>
-      </div>
-
-      <div id="cariHareketler"></div>
+      <section class="kart bugun-karti">
+        <div class="bugun-baslik">
+          <h2>Bugün girilenler</h2>
+          <span id="bugunSayisi"></span>
+        </div>
+        <div id="bugunListesi"></div>
+      </section>
 
       <p class="kayit-bilgisi">
-        Cari kayıtları bulutta ve bu cihazda otomatik saklanır.
+        Kayıtlar bulutta ve bu cihazda otomatik saklanır.
       </p>
+    </section>
+
+    <section id="musteriPaneli" class="ana-panel">
+      <section class="cari-ust alacak-karti">
+        <span>Toplam alacak</span>
+        <strong id="toplamAlacak">0 TL</strong>
+        <small id="alacakAciklamasi"></small>
+      </section>
+
+      <section class="kart musteri-karti">
+        <div class="musteri-araclari">
+          <input
+            id="musteriArama"
+            type="search"
+            placeholder="Müşteri ara"
+            aria-label="Müşteri ara"
+            autocomplete="off"
+          />
+          <button
+            id="musteriEkleButonu"
+            class="musteri-ekle-buton"
+            type="button"
+          >+ Ekle</button>
+        </div>
+
+        <div class="ekstre-filtre siralama" aria-label="Sıralama">
+          <button class="ekstre-filtre-buton" data-siralama="borc" type="button">En çok borç</button>
+          <button class="ekstre-filtre-buton" data-siralama="az" type="button">A–Z</button>
+          <button class="ekstre-filtre-buton" data-siralama="son" type="button">Son alım</button>
+        </div>
+
+        <div id="musteriListesi" class="musteri-listesi"></div>
+      </section>
+
+      <details id="silinenMusteriKutusu" class="silinen-musteriler gizli">
+        <summary>
+          Silinen müşteriler (<span id="silinenMusteriSayisi">0</span>)
+        </summary>
+        <p class="musteri-yardim">
+          Silinen müşterilerin geçmiş kayıtları saklanır. Geri aldığında
+          hesabı olduğu gibi geri gelir.
+        </p>
+        <div id="silinenMusteriler" class="musteri-listesi"></div>
+      </details>
     </section>
   </div>
 
@@ -582,6 +537,12 @@
         </div>
       </div>
 
+      <div class="ekstre-filtre" aria-label="Dönem">
+        <button class="ekstre-filtre-buton" data-ekstre-donem="hafta" type="button">Bu hafta</button>
+        <button class="ekstre-filtre-buton" data-ekstre-donem="ay" type="button">Bu ay</button>
+        <button class="ekstre-filtre-buton aktif" data-ekstre-donem="tumu" type="button">Tümü</button>
+      </div>
+
       <div class="ekstre-filtre" aria-label="Hareket türü">
         <button class="ekstre-filtre-buton aktif" data-ekstre-filtre="hepsi" type="button">Tümü</button>
         <button class="ekstre-filtre-buton" data-ekstre-filtre="satis" type="button">🥛 Süt</button>
@@ -591,12 +552,79 @@
 
       <div id="ekstreListesi" class="ekstre-listesi"></div>
 
+      <button id="ekstrePaylas" class="whatsapp-buton ekstre-paylas" type="button">
+        💬 WhatsApp'tan müşteriye gönder
+      </button>
+
       <div class="ekstre-butonlar">
         <button id="ekstreIslemEkle" class="ana-buton" type="button">
           Bu müşteriye işlem ekle
         </button>
         <button id="ekstreMusteriSil" class="sil-buton" type="button">
           Müşteriyi sil
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="paylasPenceresi" class="paylas-penceresi">
+    <div class="ayarlar paylas">
+      <div class="ayar-baslik">
+        <div>
+          <p class="ust-yazi">WhatsApp'tan gönder</p>
+          <h2 id="paylasAd"></h2>
+        </div>
+
+        <button
+          id="paylasKapat"
+          class="ikon-buton"
+          type="button"
+          aria-label="Gönderme penceresini kapat"
+        >✕</button>
+      </div>
+
+      <label for="paylasTelefon">Müşterinin telefonu</label>
+      <input
+        id="paylasTelefon"
+        type="tel"
+        inputmode="tel"
+        placeholder="05xx xxx xx xx"
+        autocomplete="off"
+      />
+      <p class="yardim paylas-yardim">
+        Numara müşteriye kaydedilir. Boş bırakırsan WhatsApp'ta kişiyi kendin seçersin.
+      </p>
+
+      <label>Dönem</label>
+      <div class="ekstre-filtre paylas-donemleri">
+        <button class="ekstre-filtre-buton aktif" data-donem="buay" type="button">Bu ay</button>
+        <button class="ekstre-filtre-buton" data-donem="gecenay" type="button">Geçen ay</button>
+        <button class="ekstre-filtre-buton" data-donem="son3ay" type="button">Son 3 ay</button>
+        <button class="ekstre-filtre-buton" data-donem="tumu" type="button">Tümü</button>
+        <button class="ekstre-filtre-buton" data-donem="ozel" type="button">Tarih seç</button>
+      </div>
+
+      <div id="paylasOzelTarih" class="paylas-tarihler gizli">
+        <div>
+          <label for="paylasBaslangic">Başlangıç</label>
+          <input id="paylasBaslangic" type="date" />
+        </div>
+        <div>
+          <label for="paylasBitis">Bitiş</label>
+          <input id="paylasBitis" type="date" />
+        </div>
+      </div>
+
+      <label for="paylasMesaj">Mesaj (göndermeden önce düzenleyebilirsin)</label>
+      <textarea id="paylasMesaj" class="paylas-mesaj" spellcheck="false"></textarea>
+      <p id="paylasUyari" class="yardim paylas-yardim"></p>
+
+      <div class="ekstre-butonlar">
+        <button id="paylasWhatsApp" class="whatsapp-buton" type="button">
+          WhatsApp'ta aç
+        </button>
+        <button id="paylasKopyala" class="ikinci-buton" type="button">
+          Kopyala
         </button>
       </div>
     </div>

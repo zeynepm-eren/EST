@@ -1,15 +1,12 @@
 "use strict";
 
-// Müşteri carileri, süt satışları, ödemeler ve haftalık özet.
+// Müşteri carileri: İşlem sekmesi (süt, bal, ödeme girişi) ve
+// Müşteriler sekmesi (liste, toplam alacak, hesap dökümü).
 
 const cariAlanlar = {
   secim: eleman("#cariSecimi"),
   bakiye: eleman("#cariBakiye"),
   bakiyeAciklamasi: eleman("#bakiyeAciklamasi"),
-  haftaAraligi: eleman("#cariHaftaAraligi"),
-  haftaLitre: eleman("#cariHaftaLitre"),
-  haftaSatis: eleman("#cariHaftaSatis"),
-  haftaOdeme: eleman("#cariHaftaOdeme"),
   litre: eleman("#cariLitre"),
   tutar: eleman("#cariTutar"),
   odeme: eleman("#cariOdeme"),
@@ -18,22 +15,23 @@ const cariAlanlar = {
   satisGirdileri: eleman("#satisGirdileri"),
   odemeGirdileri: eleman("#odemeGirdileri"),
   islemBasligi: eleman("#islemBasligi"),
-  hareketler: eleman("#cariHareketler"),
-  hareketHaftaEtiketi: eleman("#hareketHaftaEtiketi"),
   guncelFiyat: eleman("#cariGuncelFiyat"),
-  kartFiyat: eleman("#cariKartFiyat"),
   fiyatPenceresi: eleman("#fiyatPenceresi"),
   fiyatTarih: eleman("#fiyatTarih"),
   yeniLitreFiyati: eleman("#yeniLitreFiyati"),
   fiyatGecmisi: eleman("#fiyatGecmisi"),
   bakiyeAlani: eleman("#bakiyeAlani"),
-  haftaBal: eleman("#cariHaftaBal"),
   bal: eleman("#cariBal"),
   balGirdileri: eleman("#balGirdileri"),
-  islemMusteriNotu: eleman("#islemMusteriNotu"),
-  musteriKarti: eleman("#musteriKarti"),
+  kaydet: eleman("#cariKaydet"),
+  sonAlimNotu: eleman("#sonAlimNotu"),
+  notEkleButonu: eleman("#notEkleButonu"),
+  notAlani: eleman("#notAlani"),
+  bugunListesi: eleman("#bugunListesi"),
+  bugunSayisi: eleman("#bugunSayisi"),
+  toplamAlacak: eleman("#toplamAlacak"),
+  alacakAciklamasi: eleman("#alacakAciklamasi"),
   musteriArama: eleman("#musteriArama"),
-  musteriSayisi: eleman("#musteriSayisi"),
   musteriListesi: eleman("#musteriListesi"),
   silinenMusteriKutusu: eleman("#silinenMusteriKutusu"),
   silinenMusteriSayisi: eleman("#silinenMusteriSayisi"),
@@ -46,7 +44,15 @@ const cariAlanlar = {
   ekstreSutTutar: eleman("#ekstreSutTutar"),
   ekstreBal: eleman("#ekstreBal"),
   ekstreOdeme: eleman("#ekstreOdeme"),
-  ekstreListesi: eleman("#ekstreListesi")
+  ekstreListesi: eleman("#ekstreListesi"),
+  paylasPenceresi: eleman("#paylasPenceresi"),
+  paylasAd: eleman("#paylasAd"),
+  paylasTelefon: eleman("#paylasTelefon"),
+  paylasOzelTarih: eleman("#paylasOzelTarih"),
+  paylasBaslangic: eleman("#paylasBaslangic"),
+  paylasBitis: eleman("#paylasBitis"),
+  paylasMesaj: eleman("#paylasMesaj"),
+  paylasUyari: eleman("#paylasUyari")
 };
 
 // Hareket türleri: "satis" = süt satışı (eski kayıtlar da bu türde),
@@ -106,6 +112,16 @@ const cariDurum = {
   islemTuru: "satis",
   ekstreMusteriId: "",
   ekstreFiltre: "hepsi",
+  ekstreDonem: "tumu",
+  paylasDonem: "buay",
+  musteriSiralama: (() => {
+    try {
+      return localStorage.getItem("eren-sut-takip-siralama") || "borc";
+    } catch {
+      return "borc";
+    }
+  })(),
+  litreDoldurulanMusteri: "",
   haftaBaslangici:
     haftaninPazartesisi(new Date())
 };
@@ -332,14 +348,8 @@ function fiyatEtiketleriniGoster() {
   const bugunFiyati = tarihtekiLitreFiyati(
     tarihAnahtari(new Date())
   );
-  const islemTarihi = cariAlanlar.tarih.value ||
-    tarihAnahtari(new Date());
-  const islemFiyati = tarihtekiLitreFiyati(islemTarihi);
-
   cariAlanlar.guncelFiyat.textContent =
-    `${tlYaz(bugunFiyati)} / L`;
-  cariAlanlar.kartFiyat.textContent =
-    `${tlYaz(islemFiyati)}/L`;
+    `Süt ${tlYaz(bugunFiyati)} / L`;
 }
 
 function fiyatGecmisiniGoster() {
@@ -675,110 +685,6 @@ function cariBakiyesiniGoster() {
   cariAlanlar.bakiye.textContent = "0 TL";
 }
 
-function cariHaftaSinirlari() {
-  return {
-    baslangic: tarihAnahtari(
-      cariDurum.haftaBaslangici
-    ),
-    bitis: tarihAnahtari(
-      gunEkle(
-        cariDurum.haftaBaslangici,
-        6
-      )
-    )
-  };
-}
-
-function cariHaftaHareketleri() {
-  const sinirlar = cariHaftaSinirlari();
-
-  return cariDurum.veriler.hareketler.filter(
-    (hareket) =>
-      hareket.musteriId ===
-        cariDurum.veriler.secilenMusteriId &&
-      hareket.tarih >= sinirlar.baslangic &&
-      hareket.tarih <= sinirlar.bitis
-  );
-}
-
-function cariHaftasiniGoster() {
-  const haftaSonu = gunEkle(
-    cariDurum.haftaBaslangici,
-    6
-  );
-
-  const aralik =
-    `${tarihYaz(
-      cariDurum.haftaBaslangici,
-      {
-        day: "numeric",
-        month: "short"
-      }
-    )} – ${tarihYaz(
-      haftaSonu,
-      {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-      }
-    )}`;
-
-  cariAlanlar.haftaAraligi.textContent =
-    aralik;
-
-  cariAlanlar.hareketHaftaEtiketi.textContent =
-    aralik;
-
-  const hareketler = cariHaftaHareketleri();
-
-  const litre = hareketler
-    .filter(
-      (hareket) => hareket.tur === "satis"
-    )
-    .reduce(
-      (toplam, hareket) =>
-        toplam + (Number(hareket.litre) || 0),
-      0
-    );
-
-  const satis = hareketler
-    .filter(satisMi)
-    .reduce(
-      (toplam, hareket) =>
-        toplam + (Number(hareket.tutar) || 0),
-      0
-    );
-
-  const bal = hareketler
-    .filter(
-      (hareket) => hareket.tur === "bal"
-    )
-    .reduce(
-      (toplam, hareket) =>
-        toplam + (Number(hareket.tutar) || 0),
-      0
-    );
-
-  const odeme = hareketler
-    .filter(
-      (hareket) => hareket.tur === "odeme"
-    )
-    .reduce(
-      (toplam, hareket) =>
-        toplam + (Number(hareket.tutar) || 0),
-      0
-    );
-
-  cariAlanlar.haftaLitre.textContent =
-    `${litreYaz(litre)} L`;
-  cariAlanlar.haftaBal.textContent =
-    tlYaz(bal);
-  cariAlanlar.haftaSatis.textContent =
-    tlYaz(satis);
-  cariAlanlar.haftaOdeme.textContent =
-    tlYaz(odeme);
-}
-
 function cariTutariniGoster() {
   const litre = Math.max(
     0,
@@ -791,8 +697,49 @@ function cariTutariniGoster() {
 
   cariAlanlar.tutar.textContent =
     tlYaz(litre * birimFiyat);
-  cariAlanlar.kartFiyat.textContent =
-    `${tlYaz(birimFiyat)}/L`;
+}
+
+// Müşterinin en son süt alımı (tarih, sonra giriş saatine göre).
+function sonSutHareketi(musteriId) {
+  return cariDurum.veriler.hareketler
+    .filter(
+      (hareket) =>
+        hareket.musteriId === musteriId &&
+        hareket.tur === "satis" &&
+        Number(hareket.litre) > 0
+    )
+    .sort(
+      (a, b) =>
+        String(b.tarih || "").localeCompare(String(a.tarih || "")) ||
+        String(b.createdAt || "").localeCompare(String(a.createdAt || ""))
+    )[0];
+}
+
+// Müşteri değişince süt litresini son alımıyla doldurur.
+// Aynı müşteriye kayıt girildikten sonra alan 0'a döner ve tekrar
+// doldurulmaz; böylece aynı satış yanlışlıkla iki kez girilmez.
+function sonAlimiGoster() {
+  const musteri = secilenCariMusterisi();
+  const son = musteri ? sonSutHareketi(musteri.id) : undefined;
+
+  if (
+    musteri &&
+    cariDurum.litreDoldurulanMusteri !== musteri.id
+  ) {
+    cariAlanlar.litre.value = son
+      ? String(Number(son.litre))
+      : "0";
+
+    // Kayıtlar buluttan henüz gelmemiş olabilir; son alım bulunana
+    // kadar bu müşteriyi "dolduruldu" saymıyoruz.
+    if (son) {
+      cariDurum.litreDoldurulanMusteri = musteri.id;
+    }
+  }
+
+  cariAlanlar.sonAlimNotu.textContent = son
+    ? `Son alımı: ${litreYaz(Number(son.litre))} L (${tarihYaz(new Date(`${son.tarih}T12:00:00`), { day: "numeric", month: "long" })})`
+    : "";
 }
 
 function cariIslemTurunuGoster() {
@@ -813,11 +760,6 @@ function cariIslemTurunuGoster() {
     tur !== "odeme"
   );
 
-  cariAlanlar.kartFiyat.classList.toggle(
-    "gizli",
-    tur !== "satis"
-  );
-
   const basliklar = {
     satis: "Süt satışı ekle",
     bal: "Bal satışı ekle",
@@ -829,9 +771,10 @@ function cariIslemTurunuGoster() {
 
   const musteri = secilenCariMusterisi();
 
-  cariAlanlar.islemMusteriNotu.textContent = musteri
-    ? `Müşteri: ${musteri.ad}`
-    : "Önce müşteri ekle veya seç.";
+  cariAlanlar.kaydet.textContent = musteri
+    ? `${musteri.ad} hesabına işle`
+    : "Önce müşteri ekle";
+  cariAlanlar.kaydet.disabled = !musteri;
 
   document
     .querySelectorAll("[data-islem-turu]")
@@ -846,152 +789,106 @@ function cariIslemTurunuGoster() {
     );
 }
 
-function cariHareketleriGoster() {
-  cariAlanlar.hareketler.innerHTML = "";
+function hareketGunu(hareket) {
+  const zaman = new Date(String(hareket.createdAt || ""));
 
-  const hareketler = cariHaftaHareketleri()
+  return Number.isNaN(zaman.getTime())
+    ? ""
+    : tarihAnahtari(zaman);
+}
+
+// Bugün (bu cihazda veya başka cihazda) girilen kayıtlar, en yeni üstte.
+function bugunGirilenleriGoster() {
+  const bugun = tarihAnahtari(new Date());
+  const kayitlar = cariDurum.veriler.hareketler
+    .filter((hareket) => hareketGunu(hareket) === bugun)
     .slice()
-    .sort(
-      (a, b) =>
-        b.tarih.localeCompare(a.tarih) ||
-        String(a.createdAt || "").localeCompare(
-          String(b.createdAt || "")
-        )
+    .sort((a, b) =>
+      String(b.createdAt || "").localeCompare(String(a.createdAt || ""))
     );
 
-  if (hareketler.length === 0) {
-    const bosAlan =
-      document.createElement("div");
+  cariAlanlar.bugunSayisi.textContent = kayitlar.length > 0
+    ? `${kayitlar.length} kayıt`
+    : "";
+  cariAlanlar.bugunListesi.innerHTML = "";
 
-    bosAlan.className = "bos-hareket";
-    bosAlan.textContent =
-      "Bu hafta için henüz cari hareket yok.";
-
-    cariAlanlar.hareketler.appendChild(
-      bosAlan
-    );
+  if (kayitlar.length === 0) {
+    const bos = document.createElement("div");
+    bos.className = "bos-hareket";
+    bos.textContent = "Bugün henüz kayıt girilmedi.";
+    cariAlanlar.bugunListesi.appendChild(bos);
     return;
   }
 
-  const gunler = new Map();
+  kayitlar.forEach((hareket) => {
+    const musteri = musteriBul(hareket.musteriId);
+    const satir = document.createElement("div");
+    satir.className = "hareket-satiri";
 
-  hareketler.forEach(
-    (hareket) => {
-      if (!gunler.has(hareket.tarih)) {
-        gunler.set(hareket.tarih, []);
-      }
+    const bilgi = document.createElement("div");
+    bilgi.className = "hareket-bilgi";
 
-      gunler.get(hareket.tarih).push(hareket);
+    const ad = document.createElement("strong");
+    ad.textContent = musteri ? musteri.ad : "Bilinmeyen müşteri";
+
+    const ayrinti = document.createElement("small");
+    const tarihNotu = hareket.tarih !== bugun && hareket.tarih
+      ? ` · ${tarihYaz(new Date(`${hareket.tarih}T12:00:00`), { day: "numeric", month: "short" })} tarihli`
+      : "";
+    ayrinti.textContent =
+      `${hareketEtiketi(hareket)}${hareket.aciklama ? ` · ${hareket.aciklama}` : ""}${tarihNotu}`;
+
+    bilgi.appendChild(ad);
+    bilgi.appendChild(ayrinti);
+
+    const tutar = document.createElement("div");
+    tutar.className =
+      `hareket-tutar ${hareket.tur === "odeme" ? "odeme" : "satis"}`;
+    tutar.textContent = hareketTutarMetni(hareket);
+
+    const sil = document.createElement("button");
+    sil.type = "button";
+    sil.className = "hareket-sil";
+    sil.textContent = "×";
+    sil.title = "Kaydı sil";
+    sil.setAttribute("aria-label", "Kaydı sil");
+    sil.addEventListener("click", () => cariHareketSil(hareket.id));
+
+    satir.appendChild(bilgi);
+    satir.appendChild(tutar);
+    satir.appendChild(sil);
+    cariAlanlar.bugunListesi.appendChild(satir);
+  });
+}
+
+function toplamAlacagiGoster() {
+  const aktifler = aktifMusteriler();
+  let toplam = 0;
+  let borclu = 0;
+
+  aktifler.forEach((musteri) => {
+    const bakiye = musteriBakiyesi(musteri.id);
+
+    if (bakiye >= 0.005) {
+      toplam += bakiye;
+      borclu++;
     }
-  );
+  });
 
-  gunler.forEach(
-    (gunHareketleri, tarih) => {
-      const gunKarti =
-        document.createElement("section");
-      gunKarti.className = "hareket-gunu";
-
-      const tarihBasligi =
-        document.createElement("div");
-      tarihBasligi.className = "hareket-tarih";
-      tarihBasligi.textContent = tarihYaz(
-        new Date(`${tarih}T12:00:00`),
-        {
-          weekday: "long",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric"
-        }
-      );
-
-      gunKarti.appendChild(tarihBasligi);
-
-      gunHareketleri.forEach(
-        (hareket) => {
-          const satir =
-            document.createElement("div");
-          satir.className = "hareket-satiri";
-
-          const bilgi =
-            document.createElement("div");
-          bilgi.className = "hareket-bilgi";
-
-          const ad =
-            document.createElement("strong");
-
-          ad.textContent = hareketEtiketi(hareket);
-
-          bilgi.appendChild(ad);
-
-          if (hareket.aciklama) {
-            const aciklama =
-              document.createElement("small");
-            aciklama.textContent =
-              hareket.aciklama;
-            bilgi.appendChild(aciklama);
-          }
-
-          const tutar =
-            document.createElement("div");
-          tutar.className =
-            `hareket-tutar ${hareket.tur === "odeme" ? "odeme" : "satis"}`;
-          tutar.textContent =
-            hareketTutarMetni(hareket);
-
-          const sil =
-            document.createElement("button");
-          sil.type = "button";
-          sil.className = "hareket-sil";
-          sil.textContent = "×";
-          sil.title = "Hareketi sil";
-          sil.setAttribute(
-            "aria-label",
-            "Cari hareketini sil"
-          );
-          sil.addEventListener(
-            "click",
-            () => cariHareketSil(hareket.id)
-          );
-
-          satir.appendChild(bilgi);
-          satir.appendChild(tutar);
-          satir.appendChild(sil);
-          gunKarti.appendChild(satir);
-        }
-      );
-
-      const gunBakiyesi =
-        document.createElement("div");
-      gunBakiyesi.className = "gun-bakiyesi";
-
-      const bakiyeMetni =
-        document.createElement("span");
-      bakiyeMetni.textContent =
-        "İşlem sonrası bakiye";
-
-      const bakiyeTutari =
-        document.createElement("strong");
-      const bakiye = cariBakiyesi(tarih);
-      bakiyeTutari.textContent = bakiye < 0
-        ? `−${tlYaz(Math.abs(bakiye))}`
-        : tlYaz(bakiye);
-
-      gunBakiyesi.appendChild(bakiyeMetni);
-      gunBakiyesi.appendChild(bakiyeTutari);
-      gunKarti.appendChild(gunBakiyesi);
-      cariAlanlar.hareketler.appendChild(gunKarti);
-    }
-  );
+  cariAlanlar.toplamAlacak.textContent = tlYaz(toplam);
+  cariAlanlar.alacakAciklamasi.textContent =
+    `${aktifler.length} müşteri · ${borclu} müşterinin borcu var`;
 }
 
 function cariEkraniniGoster() {
   cariSecimleriniGoster();
   cariBakiyesiniGoster();
-  cariHaftasiniGoster();
   fiyatEtiketleriniGoster();
+  sonAlimiGoster();
   cariTutariniGoster();
   cariIslemTurunuGoster();
-  cariHareketleriGoster();
+  bugunGirilenleriGoster();
+  toplamAlacagiGoster();
   musteriListesiniGoster();
 
   if (cariAlanlar.ekstrePenceresi.open) {
@@ -1036,23 +933,33 @@ function musteriOzeti(musteriId) {
 }
 
 function musteriSatiriOlustur(musteri, silinmis) {
-  const satir = document.createElement("div");
+  // Aktif müşteride satırın tamamı tek düğme: dokununca döküm açılır.
+  // Silme düğmesi yanlışlıkla basılmasın diye sadece dökümde.
+  const satir = document.createElement(silinmis ? "div" : "button");
   satir.className = "musteri-satiri";
 
-  if (
-    !silinmis &&
-    musteri.id === cariDurum.veriler.secilenMusteriId
-  ) {
-    satir.classList.add("secili");
+  if (!silinmis) {
+    satir.type = "button";
+    satir.classList.add("musteri-satir-buton");
+    satir.title = `${musteri.ad} hesap dökümü`;
+    satir.addEventListener("click", () =>
+      musteriEkstresiniAc(musteri.id)
+    );
   }
 
   const ozet = musteriOzeti(musteri.id);
   const bakiye = bakiyeMetni(musteriBakiyesi(musteri.id));
 
-  const adButonu = document.createElement("button");
-  adButonu.type = "button";
-  adButonu.className = "musteri-ad-buton";
-  adButonu.title = `${musteri.ad} hesap dökümü`;
+  const adAlani = document.createElement(silinmis ? "button" : "span");
+  adAlani.className = "musteri-ad-buton";
+
+  if (silinmis) {
+    adAlani.type = "button";
+    adAlani.title = `${musteri.ad} hesap dökümü`;
+    adAlani.addEventListener("click", () =>
+      musteriEkstresiniAc(musteri.id)
+    );
+  }
 
   const ad = document.createElement("strong");
   ad.textContent = musteri.ad;
@@ -1081,13 +988,10 @@ function musteriSatiriOlustur(musteri, silinmis) {
     rozetler.appendChild(rozet);
   }
 
-  adButonu.appendChild(ad);
-  adButonu.appendChild(rozetler);
-  adButonu.addEventListener("click", () =>
-    musteriEkstresiniAc(musteri.id)
-  );
+  adAlani.appendChild(ad);
+  adAlani.appendChild(rozetler);
 
-  const bakiyeAlani = document.createElement("div");
+  const bakiyeAlani = document.createElement("span");
   bakiyeAlani.className = `musteri-bakiye ${bakiye.tur}`;
 
   const bakiyeEtiketi = document.createElement("small");
@@ -1099,38 +1003,62 @@ function musteriSatiriOlustur(musteri, silinmis) {
   bakiyeAlani.appendChild(bakiyeEtiketi);
   bakiyeAlani.appendChild(bakiyeTutari);
 
-  satir.appendChild(adButonu);
+  satir.appendChild(adAlani);
   satir.appendChild(bakiyeAlani);
 
-  const islemButonu = document.createElement("button");
-  islemButonu.type = "button";
-
   if (silinmis) {
-    islemButonu.className = "musteri-geri-al";
-    islemButonu.textContent = "Geri al";
-    islemButonu.setAttribute(
+    const geriAl = document.createElement("button");
+    geriAl.type = "button";
+    geriAl.className = "musteri-geri-al";
+    geriAl.textContent = "Geri al";
+    geriAl.setAttribute(
       "aria-label",
       `${musteri.ad} müşterisini geri al`
     );
-    islemButonu.addEventListener("click", () =>
+    geriAl.addEventListener("click", () =>
       musteriGeriAl(musteri.id)
     );
+    satir.appendChild(geriAl);
   } else {
-    islemButonu.className = "hareket-sil";
-    islemButonu.textContent = "×";
-    islemButonu.title = "Müşteriyi sil";
-    islemButonu.setAttribute(
-      "aria-label",
-      `${musteri.ad} müşterisini sil`
-    );
-    islemButonu.addEventListener("click", () =>
-      musteriSil(musteri.id)
-    );
+    const ok = document.createElement("span");
+    ok.className = "musteri-ok";
+    ok.setAttribute("aria-hidden", "true");
+    ok.textContent = "›";
+    satir.appendChild(ok);
   }
 
-  satir.appendChild(islemButonu);
-
   return satir;
+}
+
+function sonHareketTarihi(musteriId) {
+  return cariDurum.veriler.hareketler.reduce(
+    (enYeni, hareket) =>
+      hareket.musteriId === musteriId &&
+      String(hareket.tarih || "") > enYeni
+        ? String(hareket.tarih || "")
+        : enYeni,
+    ""
+  );
+}
+
+function musterileriSirala(musteriler) {
+  const alfabetik = adaGoreSirala(musteriler);
+
+  if (cariDurum.musteriSiralama === "az") {
+    return alfabetik;
+  }
+
+  if (cariDurum.musteriSiralama === "son") {
+    return alfabetik
+      .map((musteri) => ({ musteri, tarih: sonHareketTarihi(musteri.id) }))
+      .sort((a, b) => b.tarih.localeCompare(a.tarih))
+      .map(({ musteri }) => musteri);
+  }
+
+  return alfabetik
+    .map((musteri) => ({ musteri, bakiye: musteriBakiyesi(musteri.id) }))
+    .sort((a, b) => b.bakiye - a.bakiye)
+    .map(({ musteri }) => musteri);
 }
 
 function musteriListesiniGoster() {
@@ -1138,22 +1066,29 @@ function musteriListesiniGoster() {
     .trim()
     .toLocaleLowerCase("tr-TR");
 
-  const aktifler = adaGoreSirala(aktifMusteriler());
+  const aktifler = musterileriSirala(aktifMusteriler());
   const gorunenler = aktifler.filter((musteri) =>
     String(musteri.ad || "")
       .toLocaleLowerCase("tr-TR")
       .includes(arama)
   );
 
-  cariAlanlar.musteriSayisi.textContent =
-    `(${aktifler.length})`;
+  document
+    .querySelectorAll("[data-siralama]")
+    .forEach((buton) =>
+      buton.classList.toggle(
+        "aktif",
+        buton.dataset.siralama === cariDurum.musteriSiralama
+      )
+    );
+
   cariAlanlar.musteriListesi.innerHTML = "";
 
   if (gorunenler.length === 0) {
     const bos = document.createElement("div");
     bos.className = "bos-hareket";
     bos.textContent = aktifler.length === 0
-      ? "Henüz müşteri yok. “+ Müşteri ekle” ile başlayabilirsin."
+      ? "Henüz müşteri yok. “+ Ekle” ile başlayabilirsin."
       : "Aramaya uyan müşteri yok.";
     cariAlanlar.musteriListesi.appendChild(bos);
   } else {
@@ -1258,6 +1193,7 @@ function musteriEkstresiniAc(musteriId) {
 
   cariDurum.ekstreMusteriId = musteriId;
   cariDurum.ekstreFiltre = "hepsi";
+  cariDurum.ekstreDonem = "tumu";
   ekstreyiGoster();
 
   if (!cariAlanlar.ekstrePenceresi.open) {
@@ -1334,11 +1270,28 @@ function ekstreyiGoster() {
     };
   });
 
+  const bugun = new Date();
+  const donemBaslangici = cariDurum.ekstreDonem === "hafta"
+    ? tarihAnahtari(haftaninPazartesisi(bugun))
+    : cariDurum.ekstreDonem === "ay"
+      ? tarihAnahtari(new Date(bugun.getFullYear(), bugun.getMonth(), 1, 12))
+      : "";
+
+  document
+    .querySelectorAll("[data-ekstre-donem]")
+    .forEach((buton) =>
+      buton.classList.toggle(
+        "aktif",
+        buton.dataset.ekstreDonem === cariDurum.ekstreDonem
+      )
+    );
+
   const gorunenler = bakiyeli
     .filter(
       ({ hareket }) =>
-        cariDurum.ekstreFiltre === "hepsi" ||
-        hareket.tur === cariDurum.ekstreFiltre
+        (cariDurum.ekstreFiltre === "hepsi" ||
+          hareket.tur === cariDurum.ekstreFiltre) &&
+        String(hareket.tarih || "") >= donemBaslangici
     )
     .reverse();
 
@@ -1349,7 +1302,7 @@ function ekstreyiGoster() {
     bos.className = "bos-hareket";
     bos.textContent = sirali.length === 0
       ? "Bu müşteri için henüz kayıt yok."
-      : "Bu türde kayıt yok.";
+      : "Bu dönemde veya türde kayıt yok.";
     cariAlanlar.ekstreListesi.appendChild(bos);
     return;
   }
@@ -1433,6 +1386,295 @@ function ekstreyiGoster() {
   });
 }
 
+// ===== Hesap dökümünü WhatsApp'tan gönderme =====
+
+function telefonuDuzenle(metin) {
+  let rakamlar = String(metin || "").replace(/\D/g, "");
+
+  if (rakamlar.startsWith("00")) {
+    rakamlar = rakamlar.slice(2);
+  }
+
+  // 05xx… → 905xx…, 5xx… → 905xx…
+  if (rakamlar.length === 11 && rakamlar.startsWith("0")) {
+    rakamlar = `90${rakamlar.slice(1)}`;
+  } else if (rakamlar.length === 10 && rakamlar.startsWith("5")) {
+    rakamlar = `90${rakamlar}`;
+  }
+
+  return rakamlar;
+}
+
+function tarihNesnesi(anahtar) {
+  return new Date(`${anahtar}T12:00:00`);
+}
+
+function donemSinirlari(donem, musteriId) {
+  const bugun = new Date();
+  const yil = bugun.getFullYear();
+  const ay = bugun.getMonth();
+  const bugunAnahtari = tarihAnahtari(bugun);
+
+  const tarihler = cariDurum.veriler.hareketler
+    .filter((hareket) => hareket.musteriId === musteriId)
+    .map((hareket) => String(hareket.tarih || ""))
+    .filter(Boolean)
+    .sort();
+
+  const enYeni = tarihler.length > 0
+    ? tarihler[tarihler.length - 1]
+    : bugunAnahtari;
+  const sonTarih = enYeni > bugunAnahtari
+    ? enYeni
+    : bugunAnahtari;
+
+  if (donem === "gecenay") {
+    return {
+      baslangic: tarihAnahtari(new Date(yil, ay - 1, 1, 12)),
+      bitis: tarihAnahtari(new Date(yil, ay, 0, 12))
+    };
+  }
+
+  if (donem === "son3ay") {
+    return {
+      baslangic: tarihAnahtari(
+        new Date(yil, ay - 3, bugun.getDate() + 1, 12)
+      ),
+      bitis: sonTarih
+    };
+  }
+
+  if (donem === "tumu") {
+    return {
+      baslangic: tarihler[0] || bugunAnahtari,
+      bitis: sonTarih
+    };
+  }
+
+  if (donem === "ozel") {
+    const baslangic =
+      cariAlanlar.paylasBaslangic.value ||
+      tarihAnahtari(new Date(yil, ay, 1, 12));
+    const bitis =
+      cariAlanlar.paylasBitis.value || bugunAnahtari;
+
+    return baslangic <= bitis
+      ? { baslangic, bitis }
+      : { baslangic: bitis, bitis: baslangic };
+  }
+
+  return {
+    baslangic: tarihAnahtari(new Date(yil, ay, 1, 12)),
+    bitis: sonTarih
+  };
+}
+
+function bakiyeCumlesi(bakiye, bitis) {
+  const bugun = tarihAnahtari(new Date());
+  const tarihNotu = bitis < bugun
+    ? ` (${tarihYaz(tarihNesnesi(bitis), { day: "numeric", month: "long", year: "numeric" })} itibarıyla)`
+    : "";
+
+  if (Math.abs(bakiye) < 0.005) {
+    return `✅ *Hesabınız kapalı, borcunuz yok.*${tarihNotu}`;
+  }
+
+  return bakiye > 0
+    ? `*Kalan borcunuz: ${tlYaz(bakiye)}*${tarihNotu}`
+    : `*Alacağınız: ${tlYaz(Math.abs(bakiye))}*${tarihNotu}`;
+}
+
+function ekstreMesajiOlustur(musteriId, baslangic, bitis) {
+  const musteri = musteriBul(musteriId);
+
+  const sirali = cariDurum.veriler.hareketler
+    .filter((hareket) => hareket.musteriId === musteriId)
+    .slice()
+    .sort(
+      (a, b) =>
+        String(a.tarih || "").localeCompare(String(b.tarih || "")) ||
+        String(a.createdAt || "").localeCompare(String(b.createdAt || ""))
+    );
+
+  const devreden = sirali
+    .filter((hareket) => String(hareket.tarih || "") < baslangic)
+    .reduce((toplam, hareket) => toplam + cariHareketDegeri(hareket), 0);
+
+  const donemHareketleri = sirali.filter(
+    (hareket) =>
+      String(hareket.tarih || "") >= baslangic &&
+      String(hareket.tarih || "") <= bitis
+  );
+
+  const ozet = {
+    sutLitre: 0,
+    sutTutar: 0,
+    bal: 0,
+    odeme: 0
+  };
+
+  let bakiye = devreden;
+
+  const satirlar = donemHareketleri.map((hareket) => {
+    const tutar = Math.abs(Number(hareket.tutar) || 0);
+    bakiye += cariHareketDegeri(hareket);
+
+    let aciklama;
+
+    if (hareket.tur === "satis") {
+      const litre = Number(hareket.litre) || 0;
+      ozet.sutLitre += litre;
+      ozet.sutTutar += tutar;
+      aciklama = `🥛 ${litreYaz(litre)} L süt × ${tlYaz(hareketBirimFiyati(hareket))}`;
+    } else if (hareket.tur === "bal") {
+      ozet.bal += tutar;
+      aciklama = "🍯 Bal";
+    } else {
+      ozet.odeme += tutar;
+      aciklama = "💵 Ödeme";
+    }
+
+    const tarih = tarihNesnesi(hareket.tarih);
+    const tarihMetni = Number.isNaN(tarih.getTime())
+      ? "—"
+      : `${String(tarih.getDate()).padStart(2, "0")}.${String(tarih.getMonth() + 1).padStart(2, "0")}`;
+    const not = hareket.aciklama
+      ? ` (${hareket.aciklama})`
+      : "";
+
+    return `${tarihMetni} · ${aciklama} · ${hareket.tur === "odeme" ? "−" : "+"}${tlYaz(tutar)}${not}`;
+  });
+
+  const tarihAraligi =
+    `${tarihYaz(tarihNesnesi(baslangic), { day: "numeric", month: "long", year: "numeric" })} – ` +
+    `${tarihYaz(tarihNesnesi(bitis), { day: "numeric", month: "long", year: "numeric" })}`;
+
+  const parcalar = [
+    "🧾 *HESAP DÖKÜMÜ*",
+    `👤 ${musteri ? musteri.ad : ""}`,
+    `📅 ${tarihAraligi}`,
+    ""
+  ];
+
+  if (Math.abs(devreden) >= 0.005) {
+    parcalar.push(
+      `Önceki dönemden devreden: ${devreden < 0 ? "−" : ""}${tlYaz(Math.abs(devreden))}`,
+      ""
+    );
+  }
+
+  if (satirlar.length === 0) {
+    parcalar.push("Bu dönemde alım veya ödeme yok.");
+  } else {
+    parcalar.push(...satirlar);
+  }
+
+  const toplamlar = [];
+
+  if (ozet.sutTutar > 0) {
+    toplamlar.push(`🥛 Süt: ${litreYaz(ozet.sutLitre)} L – ${tlYaz(ozet.sutTutar)}`);
+  }
+
+  if (ozet.bal > 0) {
+    toplamlar.push(`🍯 Bal: ${tlYaz(ozet.bal)}`);
+  }
+
+  if (ozet.odeme > 0) {
+    toplamlar.push(`💵 Ödeme: ${tlYaz(ozet.odeme)}`);
+  }
+
+  if (toplamlar.length > 0) {
+    parcalar.push("", "*Dönem toplamı*", ...toplamlar);
+  }
+
+  parcalar.push(
+    "",
+    bakiyeCumlesi(bakiye, bitis),
+    "",
+    "Teşekkür ederiz 🙏",
+    "Eren Süt"
+  );
+
+  return {
+    mesaj: parcalar.join("\n"),
+    hareketSayisi: satirlar.length
+  };
+}
+
+function paylasMesajiniYenile() {
+  const musteriId = cariDurum.ekstreMusteriId;
+  const sinirlar = donemSinirlari(cariDurum.paylasDonem, musteriId);
+
+  document
+    .querySelectorAll("[data-donem]")
+    .forEach((buton) =>
+      buton.classList.toggle(
+        "aktif",
+        buton.dataset.donem === cariDurum.paylasDonem
+      )
+    );
+
+  cariAlanlar.paylasOzelTarih.classList.toggle(
+    "gizli",
+    cariDurum.paylasDonem !== "ozel"
+  );
+
+  if (cariDurum.paylasDonem === "ozel") {
+    cariAlanlar.paylasBaslangic.value = sinirlar.baslangic;
+    cariAlanlar.paylasBitis.value = sinirlar.bitis;
+  }
+
+  const sonuc = ekstreMesajiOlustur(
+    musteriId,
+    sinirlar.baslangic,
+    sinirlar.bitis
+  );
+
+  cariAlanlar.paylasMesaj.value = sonuc.mesaj;
+  cariAlanlar.paylasUyari.textContent = sonuc.hareketSayisi > 60
+    ? `Mesajda ${sonuc.hareketSayisi} hareket var; uzun gelirse daha kısa bir dönem seçebilirsin.`
+    : "";
+}
+
+function paylasPenceresiniAc() {
+  const musteri = musteriBul(cariDurum.ekstreMusteriId);
+
+  if (!musteri) {
+    return;
+  }
+
+  cariAlanlar.paylasAd.textContent = musteri.ad;
+  cariAlanlar.paylasTelefon.value = musteri.telefon || "";
+  cariDurum.paylasDonem = "buay";
+  paylasMesajiniYenile();
+  cariAlanlar.paylasPenceresi.showModal();
+}
+
+function paylasTelefonunuKaydet() {
+  const musteri = musteriBul(cariDurum.ekstreMusteriId);
+
+  if (!musteri) {
+    return "";
+  }
+
+  const telefon = telefonuDuzenle(cariAlanlar.paylasTelefon.value);
+
+  if (telefon !== (musteri.telefon || "")) {
+    if (telefon) {
+      musteri.telefon = telefon;
+    } else {
+      delete musteri.telefon;
+    }
+
+    musteri.guncellendi = new Date().toISOString();
+    cariVerileriKaydet();
+  }
+
+  cariAlanlar.paylasTelefon.value = telefon;
+
+  return telefon;
+}
+
 function cariHareketKaydet() {
   const musteri = secilenCariMusterisi();
   const tarih = cariAlanlar.tarih.value;
@@ -1510,10 +1752,15 @@ function cariHareketKaydet() {
       new Date(`${tarih}T12:00:00`)
     );
 
+  // Kayıttan sonra alan 0'da kalsın; aynı satış yanlışlıkla
+  // ikinci kez girilmesin.
   cariAlanlar.litre.value = "0";
+  cariDurum.litreDoldurulanMusteri = musteri.id;
   cariAlanlar.bal.value = "0";
   cariAlanlar.odeme.value = "0";
   cariAlanlar.aciklama.value = "";
+  cariAlanlar.notAlani.classList.add("gizli");
+  cariAlanlar.notEkleButonu.textContent = "+ Not ekle";
 
   cariVerileriKaydet();
   cariEkraniniGoster();
@@ -1745,9 +1992,62 @@ eleman("#ekstreIslemEkle").addEventListener("click", () => {
   cariTercihiniKaydet();
   cariAlanlar.ekstrePenceresi.close();
   cariEkraniniGoster();
-  cariAlanlar.islemBasligi
-    .closest(".kart")
-    .scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const islemSekmesi = document.querySelector('[data-panel="islemPaneli"]');
+
+  if (islemSekmesi) {
+    islemSekmesi.click();
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+eleman("#ekstrePaylas").addEventListener(
+  "click",
+  paylasPenceresiniAc
+);
+
+eleman("#paylasKapat").addEventListener("click", () =>
+  cariAlanlar.paylasPenceresi.close()
+);
+
+cariAlanlar.paylasPenceresi.addEventListener("click", (olay) => {
+  if (olay.target === cariAlanlar.paylasPenceresi) {
+    cariAlanlar.paylasPenceresi.close();
+  }
+});
+
+document
+  .querySelectorAll("[data-donem]")
+  .forEach((buton) => {
+    buton.addEventListener("click", () => {
+      cariDurum.paylasDonem = buton.dataset.donem;
+      paylasMesajiniYenile();
+    });
+  });
+
+[cariAlanlar.paylasBaslangic, cariAlanlar.paylasBitis].forEach((alan) =>
+  alan.addEventListener("change", paylasMesajiniYenile)
+);
+
+cariAlanlar.paylasTelefon.addEventListener(
+  "change",
+  paylasTelefonunuKaydet
+);
+
+eleman("#paylasWhatsApp").addEventListener("click", () => {
+  const telefon = paylasTelefonunuKaydet();
+  const mesaj = encodeURIComponent(cariAlanlar.paylasMesaj.value);
+  const adres = telefon
+    ? `https://wa.me/${telefon}?text=${mesaj}`
+    : `https://wa.me/?text=${mesaj}`;
+
+  window.open(adres, "_blank", "noopener");
+});
+
+eleman("#paylasKopyala").addEventListener("click", async () => {
+  await panoyaKopyalaFallback(cariAlanlar.paylasMesaj.value);
+  bildirimGoster("Hesap dökümü panoya kopyalandı.");
 });
 
 eleman("#ekstreMusteriSil").addEventListener("click", () => {
@@ -1761,25 +2061,6 @@ eleman("#ekstreMusteriSil").addEventListener("click", () => {
     musteriSil(musteri.id);
   } else {
     musteriGeriAl(musteri.id);
-  }
-});
-
-try {
-  if (localStorage.getItem("eren-sut-takip-musteri-karti") === "kapali") {
-    cariAlanlar.musteriKarti.open = false;
-  }
-} catch {
-  // Tarayıcı depolaması kapalı olabilir.
-}
-
-cariAlanlar.musteriKarti.addEventListener("toggle", () => {
-  try {
-    localStorage.setItem(
-      "eren-sut-takip-musteri-karti",
-      cariAlanlar.musteriKarti.open ? "acik" : "kapali"
-    );
-  } catch {
-    // Tarayıcı depolaması kapalı olabilir.
   }
 });
 
@@ -1798,41 +2079,39 @@ eleman("#fiyatiKaydet").addEventListener(
   litreFiyatiniKaydet
 );
 
-eleman("#cariOncekiHafta")
-  .addEventListener(
-    "click",
-    () => {
-      cariDurum.haftaBaslangici =
-        gunEkle(
-          cariDurum.haftaBaslangici,
-          -7
-        );
-      cariEkraniniGoster();
-    }
-  );
+document
+  .querySelectorAll("[data-siralama]")
+  .forEach((buton) => {
+    buton.addEventListener("click", () => {
+      cariDurum.musteriSiralama = buton.dataset.siralama;
 
-eleman("#cariSonrakiHafta")
-  .addEventListener(
-    "click",
-    () => {
-      cariDurum.haftaBaslangici =
-        gunEkle(
-          cariDurum.haftaBaslangici,
-          7
+      try {
+        localStorage.setItem(
+          "eren-sut-takip-siralama",
+          cariDurum.musteriSiralama
         );
-      cariEkraniniGoster();
-    }
-  );
+      } catch {
+        // Tarayıcı depolaması kapalı olabilir.
+      }
 
-eleman("#cariBuHafta")
-  .addEventListener(
-    "click",
-    () => {
-      cariDurum.haftaBaslangici =
-        haftaninPazartesisi(new Date());
-      cariEkraniniGoster();
-    }
-  );
+      musteriListesiniGoster();
+    });
+  });
+
+document
+  .querySelectorAll("[data-ekstre-donem]")
+  .forEach((buton) => {
+    buton.addEventListener("click", () => {
+      cariDurum.ekstreDonem = buton.dataset.ekstreDonem;
+      ekstreyiGoster();
+    });
+  });
+
+cariAlanlar.notEkleButonu.addEventListener("click", () => {
+  cariAlanlar.notAlani.classList.remove("gizli");
+  cariAlanlar.notEkleButonu.textContent = "Not açık";
+  cariAlanlar.aciklama.focus();
+});
 
 cariAlanlar.tarih.value =
   tarihAnahtari(new Date());
