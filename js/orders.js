@@ -1086,9 +1086,13 @@ eleman("#gunuTemizle")
         return;
       }
 
-      delete durum.veriler[
-        haftaAnahtari()
-      ][durum.secilenGun];
+      // Günü silmek yerine boşaltıyoruz: bulut kaydı "merge" ile
+      // yapıldığı için silinen anahtar bulutta kalıp geri geliyordu.
+      const kayit = gunKaydi();
+      kayit.sabah = "";
+      kayit.aksam = "";
+      kayit.sabahDurum = "";
+      kayit.aksamDurum = "";
 
       verileriKaydet();
       alanlariGoster();
