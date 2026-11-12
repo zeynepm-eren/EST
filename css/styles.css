@@ -2052,3 +2052,59 @@ button.bakiye-alani {
     font-size: 13px;
   }
 }
+
+/* Siparişler: takvimden tarihe git */
+.tarih-secici {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 2px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--kenar);
+  border-radius: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.tarih-secici .tarih {
+  padding: 0;
+  color: var(--yazi);
+  font-weight: 700;
+}
+
+.tarih-degistir {
+  flex-shrink: 0;
+  color: var(--yesil);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* Tarih alanı tüm kutuyu kaplar ama görünmez; dokununca takvim açılır. */
+.tarih-secici input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.tarih-secici:focus-within {
+  border-color: var(--yesil);
+  box-shadow: 0 0 0 3px var(--acik-yesil);
+}
+
+/* Hesap dökümü: pencere kısalınca üst kısımlar sıkışmasın,
+   sadece hareket listesi kaydırılsın. */
+.ekstre > :not(.ekstre-listesi) {
+  flex-shrink: 0;
+}
+
+.ekstre-filtre {
+  padding-bottom: 2px;
+}
