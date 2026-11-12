@@ -1029,6 +1029,173 @@ tarihGit.addEventListener("change", () => {
   ekraniGoster();
 });
 
+// ===== Sipariş yazarken isim önerisi =====
+// İsimler cari müşteri listesinden ve daha önce siparişlere yazılmış
+// satırlardan gelir; en sık yazılanlar başta. Dokununca satırın başına
+// "İsim " yazılır, litreyi sen yazarsın.
+
+function bilinenIsimler() {
+  const isimler = new Map();
+
+  function ekle(ad) {
+    const temiz = String(ad || "").trim().replace(/\s+/g, " ");
+
+    if (!temiz) {
+      return;
+    }
+
+    const anahtar = temiz.toLocaleLowerCase("tr-TR");
+    const mevcut = isimler.get(anahtar);
+
+    if (mevcut) {
+      mevcut.sayi++;
+    } else {
+      isimler.set(anahtar, { ad: temiz, anahtar, sayi: 1 });
+    }
+  }
+
+  // Cari listesindeki yazım öncelikli olsun diye önce onlar eklenir.
+  if (typeof aktifMusteriler === "function") {
+    aktifMusteriler().forEach((musteri) => ekle(musteri.ad));
+  }
+
+  Object.values(durum.veriler || {}).forEach((hafta) => {
+    Object.values(hafta || {}).forEach((gun) => {
+      ["sabah", "aksam"].forEach((donem) => {
+        siparisleriOku(String((gun && gun[donem]) || ""))
+          .gecerli
+          .forEach((siparis) => ekle(siparis.isim));
+      });
+    });
+  });
+
+  return Array.from(isimler.values());
+}
+
+function satirParcasi(alan) {
+  const imlec = typeof alan.selectionStart === "number"
+    ? alan.selectionStart
+    : alan.value.length;
+  const once = alan.value.slice(0, imlec);
+  const satirBasi = once.lastIndexOf("\n") + 1;
+
+  return {
+    satirBasi,
+    imlec,
+    parca: once.slice(satirBasi)
+  };
+}
+
+function isimOnerileriniBul(parca) {
+  const aranan = parca.trimStart().toLocaleLowerCase("tr-TR");
+
+  if (!aranan.trim() || /\d/.test(aranan)) {
+    return [];
+  }
+
+  return bilinenIsimler()
+    .filter((isim) => {
+      if (isim.anahtar === aranan.trim()) {
+        return false;
+      }
+
+      return (
+        isim.anahtar.startsWith(aranan) ||
+        isim.anahtar.split(" ").some((kelime) => kelime.startsWith(aranan.trim()))
+      );
+    })
+    .sort((a, b) => {
+      const aBas = a.anahtar.startsWith(aranan) ? 0 : 1;
+      const bBas = b.anahtar.startsWith(aranan) ? 0 : 1;
+
+      return (
+        aBas - bBas ||
+        b.sayi - a.sayi ||
+        a.ad.localeCompare(b.ad, "tr")
+      );
+    })
+    .slice(0, 6);
+}
+
+function isimOnerileriniGizle(kutu) {
+  kutu.classList.add("gizli");
+  kutu.innerHTML = "";
+}
+
+function isimiYerlestir(alan, kutu, ad) {
+  const { satirBasi, imlec } = satirParcasi(alan);
+  const sonra = alan.value.slice(imlec);
+  // İmleçten sonra aynı kelimenin devamı varsa onu da değiştir.
+  const kelimeDevami = (sonra.match(/^[^\s\d]*/) || [""])[0];
+  const kalan = sonra.slice(kelimeDevami.length).replace(/^ /, "");
+
+  alan.value = `${alan.value.slice(0, satirBasi)}${ad} ${kalan}`;
+
+  const konum = satirBasi + ad.length + 1;
+  alan.focus();
+  alan.setSelectionRange(konum, konum);
+  isimOnerileriniGizle(kutu);
+
+  // Kaydetme ve toplamlar normal yazmadaki gibi çalışsın.
+  alan.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function isimOnerileriniGoster(alan, kutu) {
+  if (alan.selectionStart !== alan.selectionEnd) {
+    isimOnerileriniGizle(kutu);
+    return;
+  }
+
+  const oneriler = isimOnerileriniBul(satirParcasi(alan).parca);
+
+  if (oneriler.length === 0) {
+    isimOnerileriniGizle(kutu);
+    return;
+  }
+
+  kutu.innerHTML = "";
+
+  oneriler.forEach((isim) => {
+    const buton = document.createElement("button");
+    buton.type = "button";
+    buton.className = "isim-onerisi";
+    buton.textContent = isim.ad;
+
+    // Dokunuş kutudan odağı almasın; klavye açık kalsın.
+    buton.addEventListener("pointerdown", (olay) => {
+      olay.preventDefault();
+      isimiYerlestir(alan, kutu, isim.ad);
+    });
+
+    kutu.appendChild(buton);
+  });
+
+  kutu.classList.remove("gizli");
+}
+
+[
+  [alanlar.sabah, eleman("#sabahOnerileri")],
+  [alanlar.aksam, eleman("#aksamOnerileri")]
+].forEach(([alan, kutu]) => {
+  ["input", "click", "keyup"].forEach((olayAdi) =>
+    alan.addEventListener(olayAdi, (olay) => {
+      if (olayAdi === "keyup" && !/^Arrow|Home|End/.test(olay.key)) {
+        return;
+      }
+
+      isimOnerileriniGoster(alan, kutu);
+    })
+  );
+
+  alan.addEventListener("blur", () => {
+    setTimeout(() => {
+      if (document.activeElement !== alan) {
+        isimOnerileriniGizle(kutu);
+      }
+    }, 150);
+  });
+});
+
 eleman("#oncekiHafta")
   .addEventListener(
     "click",
