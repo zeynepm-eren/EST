@@ -2158,3 +2158,308 @@ button.bakiye-alani {
   background: var(--yesil);
   color: white;
 }
+
+/* ===== Sütçü kartı ===== */
+:root {
+  --sutcu: #b45309;
+  --acik-sutcu: #fdf0dc;
+}
+
+.sutcu-toplam {
+  background: var(--acik-sutcu);
+  color: var(--sutcu);
+}
+
+.sutcu-girdileri {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sutcu-girdi label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sutcu-litre {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 12px;
+  border: 2px solid var(--kenar);
+  border-radius: 16px;
+  background: #fcfefd;
+}
+
+.sutcu-litre:focus-within {
+  border-color: var(--sutcu);
+}
+
+.sutcu-litre input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--yazi);
+  font-size: 24px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.sutcu-litre input.hatali {
+  color: var(--kirmizi);
+}
+
+.sutcu-litre span {
+  margin-left: 6px;
+  color: var(--soluk);
+  font-weight: 800;
+}
+
+.sutcu-ay {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--acik-sutcu);
+}
+
+.sutcu-ay-baslik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.sutcu-ay-baslik strong {
+  font-size: 15px;
+  text-transform: capitalize;
+}
+
+.sutcu-fiyat-buton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  padding: 6px 10px;
+  border: 1px solid #e7c89a;
+  border-radius: 12px;
+  background: white;
+  color: var(--sutcu);
+}
+
+.sutcu-fiyat-buton span {
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.sutcu-fiyat-buton small {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sutcu-ay-satiri {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.sutcu-ay-satiri span {
+  color: var(--soluk);
+}
+
+.sutcu-ay-tutar {
+  margin-top: 2px;
+  padding-top: 9px;
+  border-top: 1px solid #ecd6b3;
+}
+
+.sutcu-ay-tutar strong {
+  color: var(--sutcu);
+  font-size: 20px;
+}
+
+.sutcu-not {
+  margin: 4px 0 0;
+  color: var(--soluk);
+  font-size: 12px;
+}
+
+#sutcuFiyatPenceresi input[type="month"] {
+  width: 100%;
+}
+
+/* ===== Haftalık grafik: her günde müşteri + sütçü ===== */
+.grafik-lejant {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin: -3px 0 6px;
+  color: var(--soluk);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.grafik-lejant span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.grafik-lejant i {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+}
+
+.lejant-musteri {
+  background: var(--yesil);
+}
+
+.lejant-sutcu {
+  background: var(--sutcu);
+}
+
+.lejant-not {
+  font-weight: 500;
+}
+
+.hafta-kirilim {
+  margin: 0 0 10px;
+  color: var(--soluk);
+  font-size: 12px;
+}
+
+.haftalik-satis-grafigi {
+  min-height: 200px;
+}
+
+.grafik-sutun {
+  grid-template-rows: 22px 150px 22px;
+}
+
+.grafik-cubuk-alani.ikili {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 2px;
+  height: 150px;
+  padding: 0 1px;
+}
+
+.grafik-ikili-sutun {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.grafik-cubuk-deger {
+  max-width: 100%;
+  margin-bottom: 2px;
+  overflow: hidden;
+  color: var(--soluk);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.grafik-ikili-sutun .grafik-cubuk {
+  max-width: 20px;
+  border-radius: 6px 6px 2px 2px;
+}
+
+.grafik-ikili-sutun.musteri .grafik-cubuk {
+  background: #9ccfc5;
+}
+
+.grafik-ikili-sutun.sutcu .grafik-cubuk {
+  background: #e9c38f;
+}
+
+.grafik-sutun.secili-hafta .grafik-ikili-sutun.musteri .grafik-cubuk {
+  background: var(--yesil);
+}
+
+.grafik-sutun.secili-hafta .grafik-ikili-sutun.sutcu .grafik-cubuk {
+  background: var(--sutcu);
+}
+
+.grafik-sutun .grafik-deger {
+  color: var(--yazi);
+  font-size: 10px;
+}
+
+/* ===== Siparişler: müşteri listesinden açılır isim önerisi ===== */
+.isim-onerileri {
+  display: block;
+  margin-top: 6px;
+  overflow: hidden;
+  border: 1px solid var(--kenar);
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 12px 28px rgba(5, 28, 23, 0.14);
+}
+
+.isim-onerileri-baslik {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--kenar);
+  background: var(--arka-plan);
+  color: var(--soluk);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.isim-oneri-satiri {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-bottom: 1px solid #edf2f0;
+  background: white;
+  color: var(--yazi);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: left;
+}
+
+.isim-oneri-satiri:last-child {
+  border-bottom: none;
+}
+
+.isim-oneri-satiri:hover,
+.isim-oneri-satiri:active {
+  background: var(--acik-yesil);
+  color: var(--yesil);
+}
+
+@media (max-width: 380px) {
+  .grafik-cubuk-deger {
+    font-size: 8px;
+  }
+
+  .sutcu-litre input {
+    font-size: 20px;
+  }
+}
+
+/* Günlük özet: sayı ve "L" aynı satırda, aynı boyda */
+.ozet-kutu strong span {
+  display: inline;
+  color: inherit;
+  font-size: inherit;
+}

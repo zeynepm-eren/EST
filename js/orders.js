@@ -13,9 +13,6 @@ const alanlar = {
 
   sabahToplam: eleman("#sabahToplam"),
   aksamToplam: eleman("#aksamToplam"),
-  ozetSabah: eleman("#ozetSabah"),
-  ozetAksam: eleman("#ozetAksam"),
-  gunlukToplam: eleman("#gunlukToplam"),
   haftaToplamLitre: eleman("#haftaToplamLitre"),
   haftaSatisGrafigi: eleman("#haftaSatisGrafigi"),
 
@@ -30,6 +27,21 @@ const alanlar = {
   telefon: eleman("#telefon"),
 
   bildirim: eleman("#bildirim"),
+
+  sutcuSabah: eleman("#sutcuSabah"),
+  sutcuAksam: eleman("#sutcuAksam"),
+  sutcuHata: eleman("#sutcuHata"),
+  sutcuGunToplam: eleman("#sutcuGunToplam"),
+  sutcuAyAdi: eleman("#sutcuAyAdi"),
+  sutcuFiyatMetni: eleman("#sutcuFiyatMetni"),
+  sutcuAyLitre: eleman("#sutcuAyLitre"),
+  sutcuAyTutar: eleman("#sutcuAyTutar"),
+  sutcuFiyatNotu: eleman("#sutcuFiyatNotu"),
+  sutcuFiyatPenceresi: eleman("#sutcuFiyatPenceresi"),
+  sutcuFiyatAy: eleman("#sutcuFiyatAy"),
+  sutcuFiyatGirdi: eleman("#sutcuFiyatGirdi"),
+  sutcuFiyatGecmisi: eleman("#sutcuFiyatGecmisi"),
+  haftaKirilim: eleman("#haftaKirilim"),
 
   syncDurum: eleman("#syncDurum"),
   syncHataDetay: eleman("#syncHataDetay")
@@ -129,17 +141,23 @@ function siparisVerileriniUygula(yeniVeriler) {
 }
 
 function ayarlariUygula(yeniAyarlar) {
+  const kaynak =
+    yeniAyarlar && typeof yeniAyarlar === "object"
+      ? yeniAyarlar
+      : {};
+
+  // Bilinmeyen alanlar (ör. sütçü fiyatları) korunur.
   const temizAyarlar = {
+    ...kaynak,
     aliciAdi:
-      yeniAyarlar &&
-      typeof yeniAyarlar.aliciAdi === "string"
-        ? yeniAyarlar.aliciAdi
+      typeof kaynak.aliciAdi === "string"
+        ? kaynak.aliciAdi
         : "",
     telefon:
-      yeniAyarlar &&
-      typeof yeniAyarlar.telefon === "string"
-        ? yeniAyarlar.telefon
-        : ""
+      typeof kaynak.telefon === "string"
+        ? kaynak.telefon
+        : "",
+    sutcuFiyatlari: sutcuFiyatlariniTemizle(kaynak.sutcuFiyatlari)
   };
 
   if (
@@ -162,6 +180,8 @@ function ayarlariUygula(yeniAyarlar) {
     alanlar.telefon.value =
       durum.ayarlar.telefon;
   }
+
+  sutcuGoster();
 }
 
 function siparisleriOku(metin) {
@@ -252,19 +272,8 @@ function toplamlariHesapla() {
   const aksam =
     litreYaz(aksamSonuc.toplam);
 
-  const genel =
-    litreYaz(
-      sabahSonuc.toplam +
-      aksamSonuc.toplam
-    );
-
   alanlar.sabahToplam.textContent = sabah;
   alanlar.aksamToplam.textContent = aksam;
-
-  alanlar.ozetSabah.textContent = sabah;
-  alanlar.ozetAksam.textContent = aksam;
-
-  alanlar.gunlukToplam.textContent = genel;
 
   hataGoster(
     alanlar.sabah,
@@ -285,12 +294,36 @@ function gunlukSiparisToplami(gunSirasi) {
   const gun = hafta[gunSirasi] || {};
   const sabah = siparisleriOku(gun.sabah || "").toplam;
   const aksam = siparisleriOku(gun.aksam || "").toplam;
+  const sutcu = gunSutcuLitresi(gun);
 
   return {
     sabah,
     aksam,
-    toplam: sabah + aksam
+    musteri: sabah + aksam,
+    sutcu,
+    toplam: sabah + aksam + sutcu
   };
+}
+
+function grafikCubugu(deger, enYuksek, tur, baslik) {
+  const sutun = document.createElement("div");
+  sutun.className = `grafik-ikili-sutun ${tur}`;
+  sutun.title = baslik;
+
+  const etiket = document.createElement("span");
+  etiket.className = "grafik-cubuk-deger";
+  etiket.textContent = deger > 0 ? litreYaz(deger) : "0";
+
+  const cubuk = document.createElement("div");
+  cubuk.className = "grafik-cubuk";
+  cubuk.style.height = deger > 0
+    ? `${Math.max(4, (deger / enYuksek) * 100)}%`
+    : "2px";
+
+  sutun.appendChild(etiket);
+  sutun.appendChild(cubuk);
+
+  return sutun;
 }
 
 function haftaSatisGrafiginiGoster() {
@@ -300,15 +333,21 @@ function haftaSatisGrafiginiGoster() {
   );
   const enYuksek = Math.max(
     1,
-    ...gunToplamlari.map((gun) => gun.toplam)
+    ...gunToplamlari.map((gun) => Math.max(gun.musteri, gun.sutcu))
   );
-  const haftaToplami = gunToplamlari.reduce(
-    (toplam, gun) => toplam + gun.toplam,
-    0
+  const hafta = gunToplamlari.reduce(
+    (toplam, gun) => ({
+      musteri: toplam.musteri + gun.musteri,
+      sutcu: toplam.sutcu + gun.sutcu
+    }),
+    { musteri: 0, sutcu: 0 }
   );
+  const haftaToplami = hafta.musteri + hafta.sutcu;
 
   alanlar.haftaToplamLitre.textContent =
     `${litreYaz(haftaToplami)} L`;
+  alanlar.haftaKirilim.textContent =
+    `Bu hafta: müşteri ${litreYaz(hafta.musteri)} L · sütçü ${litreYaz(hafta.sutcu)} L · toplam ${litreYaz(haftaToplami)} L`;
   alanlar.haftaSatisGrafigi.innerHTML = "";
 
   gunToplamlari.forEach((gun, sira) => {
@@ -319,30 +358,28 @@ function haftaSatisGrafiginiGoster() {
       sutun.classList.add("secili-hafta");
     }
 
-    const deger = document.createElement("span");
-    deger.className = "grafik-deger";
-    deger.textContent = `${litreYaz(gun.toplam)} L`;
+    const toplamEtiketi = document.createElement("span");
+    toplamEtiketi.className = "grafik-deger";
+    toplamEtiketi.textContent = `${litreYaz(gun.toplam)} L`;
 
     const cubukAlani = document.createElement("div");
-    cubukAlani.className = "grafik-cubuk-alani";
-
-    const cubuk = document.createElement("div");
-    cubuk.className = "grafik-cubuk";
-    cubuk.style.height = gun.toplam > 0
-      ? `${Math.max(6, (gun.toplam / enYuksek) * 100)}%`
-      : "2px";
-
-    cubukAlani.appendChild(cubuk);
+    cubukAlani.className = "grafik-cubuk-alani ikili";
+    cubukAlani.appendChild(
+      grafikCubugu(gun.musteri, enYuksek, "musteri", `Müşteri ${litreYaz(gun.musteri)} L`)
+    );
+    cubukAlani.appendChild(
+      grafikCubugu(gun.sutcu, enYuksek, "sutcu", `Sütçü ${litreYaz(gun.sutcu)} L`)
+    );
 
     const etiket = document.createElement("span");
     etiket.className = "grafik-etiket";
     etiket.textContent = kisaGunler[sira];
 
     sutun.title =
-      `${gunAdlari[sira]}: ${litreYaz(gun.toplam)} L ` +
-      `(sabah ${litreYaz(gun.sabah)} L, akşam ${litreYaz(gun.aksam)} L)`;
+      `${gunAdlari[sira]}: toplam ${litreYaz(gun.toplam)} L ` +
+      `(müşteri ${litreYaz(gun.musteri)} L, sütçü ${litreYaz(gun.sutcu)} L)`;
 
-    sutun.appendChild(deger);
+    sutun.appendChild(toplamEtiketi);
     sutun.appendChild(cubukAlani);
     sutun.appendChild(etiket);
     alanlar.haftaSatisGrafigi.appendChild(sutun);
@@ -353,9 +390,9 @@ function haftaSatisGrafiginiGoster() {
     gunToplamlari
       .map(
         (gun, sira) =>
-          `${gunAdlari[sira]} ${litreYaz(gun.toplam)} litre`
+          `${gunAdlari[sira]}: müşteri ${litreYaz(gun.musteri)}, sütçü ${litreYaz(gun.sutcu)}, toplam ${litreYaz(gun.toplam)} litre`
       )
-      .join(", ") +
+      .join(". ") +
       `. Haftalık toplam ${litreYaz(haftaToplami)} litre.`
   );
 }
@@ -462,6 +499,7 @@ function ekraniGoster() {
   haftaBilgisiniGoster();
   gunleriGoster();
   alanlariGoster();
+  sutcuGoster();
   haftaSatisGrafiginiGoster();
   senkronDurumunuGoster();
 }
@@ -1035,41 +1073,22 @@ tarihGit.addEventListener("change", () => {
 // "İsim " yazılır, litreyi sen yazarsın.
 
 function bilinenIsimler() {
-  const isimler = new Map();
-
-  function ekle(ad) {
-    const temiz = String(ad || "").trim().replace(/\s+/g, " ");
-
-    if (!temiz) {
-      return;
-    }
-
-    const anahtar = temiz.toLocaleLowerCase("tr-TR");
-    const mevcut = isimler.get(anahtar);
-
-    if (mevcut) {
-      mevcut.sayi++;
-    } else {
-      isimler.set(anahtar, { ad: temiz, anahtar, sayi: 1 });
-    }
+  // Öneriler sadece müşteri listesindeki (cari) isimlerden gelir.
+  if (typeof aktifMusteriler !== "function") {
+    return [];
   }
 
-  // Cari listesindeki yazım öncelikli olsun diye önce onlar eklenir.
-  if (typeof aktifMusteriler === "function") {
-    aktifMusteriler().forEach((musteri) => ekle(musteri.ad));
-  }
+  return aktifMusteriler()
+    .map((musteri) => {
+      const ad = String(musteri.ad || "").trim().replace(/\s+/g, " ");
 
-  Object.values(durum.veriler || {}).forEach((hafta) => {
-    Object.values(hafta || {}).forEach((gun) => {
-      ["sabah", "aksam"].forEach((donem) => {
-        siparisleriOku(String((gun && gun[donem]) || ""))
-          .gecerli
-          .forEach((siparis) => ekle(siparis.isim));
-      });
-    });
-  });
-
-  return Array.from(isimler.values());
+      return {
+        ad,
+        anahtar: ad.toLocaleLowerCase("tr-TR"),
+        sayi: 0
+      };
+    })
+    .filter((isim) => isim.ad);
 }
 
 function satirParcasi(alan) {
@@ -1155,19 +1174,24 @@ function isimOnerileriniGoster(alan, kutu) {
 
   kutu.innerHTML = "";
 
+  const baslik = document.createElement("div");
+  baslik.className = "isim-onerileri-baslik";
+  baslik.textContent = "Müşteri listesinden";
+  kutu.appendChild(baslik);
+
   oneriler.forEach((isim) => {
-    const buton = document.createElement("button");
-    buton.type = "button";
-    buton.className = "isim-onerisi";
-    buton.textContent = isim.ad;
+    const satir = document.createElement("button");
+    satir.type = "button";
+    satir.className = "isim-oneri-satiri";
+    satir.textContent = isim.ad;
 
     // Dokunuş kutudan odağı almasın; klavye açık kalsın.
-    buton.addEventListener("pointerdown", (olay) => {
+    satir.addEventListener("pointerdown", (olay) => {
       olay.preventDefault();
       isimiYerlestir(alan, kutu, isim.ad);
     });
 
-    kutu.appendChild(buton);
+    kutu.appendChild(satir);
   });
 
   kutu.classList.remove("gizli");
@@ -1194,6 +1218,262 @@ function isimOnerileriniGoster(alan, kutu) {
       }
     }, 150);
   });
+});
+
+// ===== Sütçü: günlük sabah/akşam litre, aylık fiyat ve tutar =====
+// Litreler günün kaydında (sutcuSabah, sutcuAksam), aylık fiyatlar
+// ayarlarda (sutcuFiyatlari: { "2026-11": 26.5 }) tutulur.
+
+const VARSAYILAN_SUTCU_FIYATI = 26.5;
+
+function sutcuFiyatlariniTemizle(fiyatlar) {
+  const temiz = {};
+
+  if (fiyatlar && typeof fiyatlar === "object" && !Array.isArray(fiyatlar)) {
+    Object.entries(fiyatlar).forEach(([ay, fiyat]) => {
+      const sayi = Number(fiyat);
+
+      if (/^\d{4}-\d{2}$/.test(ay) && Number.isFinite(sayi) && sayi > 0) {
+        temiz[ay] = Math.round(sayi * 100) / 100;
+      }
+    });
+  }
+
+  return temiz;
+}
+
+function ayAnahtari(tarih) {
+  return tarihAnahtari(tarih).slice(0, 7);
+}
+
+function ayAdi(ay) {
+  return tarihYaz(new Date(`${ay}-01T12:00:00`), {
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function sayiyaCevir(metin) {
+  const temiz = String(metin || "").trim().replace(",", ".");
+
+  if (!temiz) {
+    return 0;
+  }
+
+  const sayi = Number(temiz);
+
+  return Number.isFinite(sayi) && sayi >= 0
+    ? sayi
+    : NaN;
+}
+
+function gunSutcuLitresi(gun) {
+  return (
+    (Number(gun && gun.sutcuSabah) || 0) +
+    (Number(gun && gun.sutcuAksam) || 0)
+  );
+}
+
+// O ayın fiyatı; girilmemişse önceki en yakın ayın fiyatı.
+function sutcuFiyati(ay) {
+  const fiyatlar = sutcuFiyatlariniTemizle(
+    durum.ayarlar && durum.ayarlar.sutcuFiyatlari
+  );
+
+  if (fiyatlar[ay]) {
+    return { fiyat: fiyatlar[ay], kaynakAy: ay };
+  }
+
+  const onceki = Object.keys(fiyatlar)
+    .filter((digerAy) => digerAy < ay)
+    .sort()
+    .pop();
+
+  return onceki
+    ? { fiyat: fiyatlar[onceki], kaynakAy: onceki }
+    : { fiyat: VARSAYILAN_SUTCU_FIYATI, kaynakAy: "" };
+}
+
+function ayinSutcuLitresi(ay) {
+  let toplam = 0;
+
+  Object.entries(durum.veriler || {}).forEach(([haftaBasi, hafta]) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(haftaBasi) || !hafta) {
+      return;
+    }
+
+    const pazartesi = new Date(`${haftaBasi}T12:00:00`);
+
+    Object.entries(hafta).forEach(([sira, gun]) => {
+      const tarih = gunEkle(pazartesi, Number(sira));
+
+      if (ayAnahtari(tarih) === ay) {
+        toplam += gunSutcuLitresi(gun);
+      }
+    });
+  });
+
+  return toplam;
+}
+
+function sutcuGoster() {
+  const hafta = durum.veriler[haftaAnahtari()] || {};
+  const gun = hafta[durum.secilenGun] || {};
+
+  [
+    [alanlar.sutcuSabah, gun.sutcuSabah],
+    [alanlar.sutcuAksam, gun.sutcuAksam]
+  ].forEach(([alan, deger]) => {
+    // Yazılan alanın içeriğine dokunma.
+    if (document.activeElement !== alan) {
+      alan.value = Number(deger) > 0
+        ? litreYaz(Number(deger))
+        : "";
+      alan.classList.remove("hatali");
+    }
+  });
+
+  alanlar.sutcuGunToplam.textContent = litreYaz(gunSutcuLitresi(gun));
+
+  const ay = ayAnahtari(secilenTarih());
+  const { fiyat, kaynakAy } = sutcuFiyati(ay);
+  const litre = ayinSutcuLitresi(ay);
+  const tutar = Math.round(litre * fiyat * 100) / 100;
+
+  alanlar.sutcuAyAdi.textContent = ayAdi(ay);
+  alanlar.sutcuFiyatMetni.textContent =
+    `${litreYaz(fiyat)} TL / L`;
+  alanlar.sutcuAyLitre.textContent = `${litreYaz(litre)} L`;
+  alanlar.sutcuAyTutar.textContent =
+    `${new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(tutar)} TL`;
+  alanlar.sutcuFiyatNotu.textContent = kaynakAy === ay
+    ? `${litreYaz(litre)} L × ${litreYaz(fiyat)} TL`
+    : kaynakAy
+      ? `${ayAdi(ay)} için fiyat girilmedi; ${ayAdi(kaynakAy)} fiyatı kullanılıyor.`
+      : "Henüz fiyat girilmedi; 26,5 TL kullanılıyor.";
+}
+
+function sutcuLitresiniKaydet(donem, alan) {
+  const sayi = sayiyaCevir(alan.value);
+  const gecersiz = Number.isNaN(sayi);
+
+  alan.classList.toggle("hatali", gecersiz);
+  alanlar.sutcuHata.classList.toggle(
+    "gizli",
+    !alanlar.sutcuSabah.classList.contains("hatali") &&
+      !alanlar.sutcuAksam.classList.contains("hatali")
+  );
+
+  if (gecersiz) {
+    return;
+  }
+
+  const kayit = gunKaydi();
+  // 0 da kaydedilir: bulut "birleştirerek" yazdığı için alanı silmek
+  // eski değerin geri gelmesine yol açardı.
+  kayit[donem] = Math.round(sayi * 100) / 100;
+
+  verileriKaydet();
+  sutcuGoster();
+  haftaSatisGrafiginiGoster();
+}
+
+alanlar.sutcuSabah.addEventListener("input", () =>
+  sutcuLitresiniKaydet("sutcuSabah", alanlar.sutcuSabah)
+);
+
+alanlar.sutcuAksam.addEventListener("input", () =>
+  sutcuLitresiniKaydet("sutcuAksam", alanlar.sutcuAksam)
+);
+
+[alanlar.sutcuSabah, alanlar.sutcuAksam].forEach((alan) =>
+  alan.addEventListener("blur", () => {
+    if (!alan.classList.contains("hatali")) {
+      sutcuGoster();
+    }
+  })
+);
+
+function sutcuFiyatGecmisiniGoster() {
+  const fiyatlar = sutcuFiyatlariniTemizle(durum.ayarlar.sutcuFiyatlari);
+  const aylar = Object.keys(fiyatlar).sort().reverse();
+
+  alanlar.sutcuFiyatGecmisi.innerHTML = "";
+
+  if (aylar.length === 0) {
+    const satir = document.createElement("div");
+    satir.className = "fiyat-gecmisi-satiri";
+    satir.textContent = "Henüz fiyat girilmedi (varsayılan 26,5 TL).";
+    alanlar.sutcuFiyatGecmisi.appendChild(satir);
+    return;
+  }
+
+  aylar.forEach((ay) => {
+    const satir = document.createElement("div");
+    satir.className = "fiyat-gecmisi-satiri";
+
+    const ad = document.createElement("span");
+    ad.textContent = ayAdi(ay);
+
+    const fiyat = document.createElement("strong");
+    fiyat.textContent = `${litreYaz(fiyatlar[ay])} TL / L`;
+
+    satir.appendChild(ad);
+    satir.appendChild(fiyat);
+    alanlar.sutcuFiyatGecmisi.appendChild(satir);
+  });
+}
+
+eleman("#sutcuFiyatButonu").addEventListener("click", () => {
+  const ay = ayAnahtari(secilenTarih());
+
+  alanlar.sutcuFiyatAy.value = ay;
+  alanlar.sutcuFiyatGirdi.value = litreYaz(sutcuFiyati(ay).fiyat);
+  sutcuFiyatGecmisiniGoster();
+  alanlar.sutcuFiyatPenceresi.showModal();
+});
+
+alanlar.sutcuFiyatAy.addEventListener("change", () => {
+  if (/^\d{4}-\d{2}$/.test(alanlar.sutcuFiyatAy.value)) {
+    alanlar.sutcuFiyatGirdi.value =
+      litreYaz(sutcuFiyati(alanlar.sutcuFiyatAy.value).fiyat);
+  }
+});
+
+eleman("#sutcuFiyatKaydet").addEventListener("click", () => {
+  const ay = alanlar.sutcuFiyatAy.value;
+  const fiyat = sayiyaCevir(alanlar.sutcuFiyatGirdi.value);
+
+  if (!/^\d{4}-\d{2}$/.test(ay)) {
+    bildirimGoster("Fiyatın geçerli olacağı ayı seç.");
+    return;
+  }
+
+  if (!(fiyat > 0)) {
+    bildirimGoster("Sıfırdan büyük bir litre fiyatı yaz.");
+    return;
+  }
+
+  durum.ayarlar = {
+    ...durum.ayarlar,
+    sutcuFiyatlari: {
+      ...sutcuFiyatlariniTemizle(durum.ayarlar.sutcuFiyatlari),
+      [ay]: Math.round(fiyat * 100) / 100
+    }
+  };
+
+  localStorage.setItem(
+    AYAR_ANAHTARI,
+    JSON.stringify(durum.ayarlar)
+  );
+
+  if (typeof window.bulutaKaydet === "function") {
+    window.bulutaKaydet("ayarlar", durum.ayarlar);
+  }
+
+  alanlar.sutcuFiyatPenceresi.close();
+  sutcuGoster();
+  bildirimGoster(`${ayAdi(ay)} sütçü fiyatı ${litreYaz(fiyat)} TL / L.`);
 });
 
 eleman("#oncekiHafta")
@@ -1324,6 +1604,7 @@ eleman("#ayarlariKaydet")
       olay.preventDefault();
 
       durum.ayarlar = {
+        ...durum.ayarlar,
         aliciAdi:
           alanlar.aliciAdi.value.trim(),
 
