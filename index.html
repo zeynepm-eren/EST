@@ -14,7 +14,7 @@
 
   <title>Eren Süt Takip</title>
 
-  <link rel="stylesheet" href="css/styles.css?v=20261112c" />
+  <link rel="stylesheet" href="css/styles.css?v=20261112e" />
 </head>
 
 <body>
@@ -196,20 +196,54 @@
       <p id="aksamDurum" class="durum"></p>
     </section>
 
-    <section class="kart ozet">
-      <div class="ozet-kutu">
-        <span>Sabah</span>
-        <strong><span id="ozetSabah">0</span> L</strong>
+    <section class="kart sutcu-karti">
+      <div class="kart-baslik">
+        <div>
+          <p class="ust-yazi">🚚 Sütçü</p>
+          <h2>Sütçüye verilen süt</h2>
+        </div>
+
+        <div class="toplam sutcu-toplam">
+          <span id="sutcuGunToplam">0</span> L
+        </div>
       </div>
 
-      <div class="ozet-kutu">
-        <span>Akşam</span>
-        <strong><span id="ozetAksam">0</span> L</strong>
-      </div>
+      <div class="sutcu-girdileri">
+        <div class="sutcu-girdi">
+          <label for="sutcuSabah">☀️ Sabah</label>
+          <div class="sutcu-litre">
+            <input id="sutcuSabah" type="text" inputmode="decimal" placeholder="0" autocomplete="off" />
+            <span>L</span>
+          </div>
+        </div>
 
-      <div class="ozet-kutu genel-toplam">
-        <span>Günlük toplam</span>
-        <strong><span id="gunlukToplam">0</span> L</strong>
+        <div class="sutcu-girdi">
+          <label for="sutcuAksam">🌙 Akşam</label>
+          <div class="sutcu-litre">
+            <input id="sutcuAksam" type="text" inputmode="decimal" placeholder="0" autocomplete="off" />
+            <span>L</span>
+          </div>
+        </div>
+      </div>
+      <p id="sutcuHata" class="hata gizli">Litreyi sayı olarak yaz (örn. 25 veya 12,5).</p>
+
+      <div class="sutcu-ay">
+        <div class="sutcu-ay-baslik">
+          <strong id="sutcuAyAdi">Bu ay</strong>
+          <button id="sutcuFiyatButonu" class="sutcu-fiyat-buton" type="button">
+            <span id="sutcuFiyatMetni">26,5 TL / L</span>
+            <small>fiyatı değiştir</small>
+          </button>
+        </div>
+        <div class="sutcu-ay-satiri">
+          <span>Bu ay sütçüye verilen</span>
+          <strong id="sutcuAyLitre">0 L</strong>
+        </div>
+        <div class="sutcu-ay-satiri sutcu-ay-tutar">
+          <span>Sütçüden alınacak</span>
+          <strong id="sutcuAyTutar">0 TL</strong>
+        </div>
+        <p id="sutcuFiyatNotu" class="sutcu-not"></p>
       </div>
     </section>
 
@@ -222,9 +256,12 @@
         <div id="haftaToplamLitre" class="toplam">0 L</div>
       </div>
 
-      <p class="grafik-aciklama">
-        Her sütun o günün sabah + akşam toplamını gösterir.
-      </p>
+      <div class="grafik-lejant">
+        <span><i class="lejant-musteri"></i>Müşteri</span>
+        <span><i class="lejant-sutcu"></i>Sütçü</span>
+        <span class="lejant-not">Üstteki sayı günün toplamı</span>
+      </div>
+      <p id="haftaKirilim" class="hafta-kirilim"></p>
 
       <div
         id="haftaSatisGrafigi"
@@ -629,6 +666,37 @@
     </div>
   </dialog>
 
+  <dialog id="sutcuFiyatPenceresi">
+    <form method="dialog" class="ayarlar">
+      <div class="ayar-baslik">
+        <h2>Sütçü litre fiyatı</h2>
+        <button class="ikon-buton" value="cancel" aria-label="Sütçü fiyat penceresini kapat">✕</button>
+      </div>
+
+      <p class="yardim fiyat-yardim">
+        Fiyat seçtiğin ayın tamamında kullanılır. Sonraki aylar sen değiştirene
+        kadar aynı fiyatla devam eder.
+      </p>
+
+      <label for="sutcuFiyatAy">Ay</label>
+      <input id="sutcuFiyatAy" type="month" />
+
+      <label for="sutcuFiyatGirdi">Litre fiyatı</label>
+      <div class="fiyat-girdi">
+        <input id="sutcuFiyatGirdi" type="text" inputmode="decimal" placeholder="Örn. 26,5" autocomplete="off" />
+        <span>TL / L</span>
+      </div>
+
+      <button id="sutcuFiyatKaydet" class="ana-buton" type="button">Fiyatı kaydet</button>
+
+      <div class="fiyat-gecmisi-baslik">
+        <strong>Fiyat geçmişi</strong>
+        <small>Aylara göre</small>
+      </div>
+      <div id="sutcuFiyatGecmisi" class="fiyat-gecmisi"></div>
+    </form>
+  </dialog>
+
   <dialog id="ayarPenceresi">
     <form method="dialog" class="ayarlar">
       <div class="ayar-baslik">
@@ -662,10 +730,10 @@
 
   <div id="bildirim" class="bildirim"></div>
 
-  <script src="js/shared.js?v=20261112c" defer></script>
-  <script src="js/orders.js?v=20261112c" defer></script>
-  <script src="js/accounts.js?v=20261112c" defer></script>
-  <script src="js/app.js?v=20261112c" defer></script>
+  <script src="js/shared.js?v=20261112e" defer></script>
+  <script src="js/orders.js?v=20261112e" defer></script>
+  <script src="js/accounts.js?v=20261112e" defer></script>
+  <script src="js/app.js?v=20261112e" defer></script>
 
   <script
     src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"
@@ -679,6 +747,6 @@
     src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"
     defer
   ></script>
-  <script src="js/firebase.js?v=20261112c" defer></script>
+  <script src="js/firebase.js?v=20261112e" defer></script>
 </body>
 </html>
