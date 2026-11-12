@@ -52,6 +52,11 @@ Ayşe 10
 - Hatalı cari hareketini silme
 - Önceki ve sonraki haftaları görüntüleme
 - Cari verileri cihazlar arasında senkronize etme
+- Alfabetik müşteri listesi, arama, müşteri ekleme ve silme
+  (silinen müşterinin kayıtları saklanır, "Silinen müşteriler" bölümünden geri alınabilir)
+- Müşterinin adına dokununca tüm alım ve ödeme geçmişini gösteren hesap dökümü
+  (tarih, tutar, işlem sonrası bakiye; Süt / Bal / Ödeme filtresi)
+- TL olarak girilen bal satışı
 
 ---
 

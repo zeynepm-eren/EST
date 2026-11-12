@@ -35,6 +35,56 @@ let bulutHazir = false;
 let aktifKullanici = null;
 let dinleyiciIptalleri = [];
 const kaydetmeZamanlayicilari = new Map();
+const bekleyenVeriler = new Map();
+const ucustakiYazmalar = new Map();
+
+// Buluta henüz ulaşmamış kayıtları cihazda işaretler. Sayfa kapanırsa
+// bir sonraki açılışta önce bu kayıtlar gönderilir, sonra bulut indirilir.
+const BEKLEYEN_YAZMA_ANAHTARI = "eren-sut-takip-bekleyen-yazma";
+const BEKLEYEN_YAZMA_OMRU_MS = 3 * 24 * 60 * 60 * 1000;
+
+function bekleyenIsaretleri() {
+  const kayit = kayitOku(BEKLEYEN_YAZMA_ANAHTARI, {});
+
+  return kayit && typeof kayit === "object"
+    ? kayit
+    : {};
+}
+
+function bekleyenIsaretle(tur) {
+  try {
+    const isaretler = bekleyenIsaretleri();
+    isaretler[tur] = Date.now();
+    localStorage.setItem(
+      BEKLEYEN_YAZMA_ANAHTARI,
+      JSON.stringify(isaretler)
+    );
+  } catch {
+    // Depolama kapalıysa sessizce devam et.
+  }
+}
+
+function bekleyenIsaretiniKaldir(tur) {
+  try {
+    const isaretler = bekleyenIsaretleri();
+    delete isaretler[tur];
+    localStorage.setItem(
+      BEKLEYEN_YAZMA_ANAHTARI,
+      JSON.stringify(isaretler)
+    );
+  } catch {
+    // Depolama kapalıysa sessizce devam et.
+  }
+}
+
+// Bu cihazın gönderilmemiş ya da yolda olan bir kaydı varsa,
+// buluttan gelen (daha eski) veri ekrandaki yeni girişin üzerine yazılmaz.
+function yazmaBekliyor(tur) {
+  return (
+    kaydetmeZamanlayicilari.has(tur) ||
+    (ucustakiYazmalar.get(tur) || 0) > 0
+  );
+}
 
 function bulutDurumunuGoster(metin, tur = "") {
   bulutDurum.textContent = metin;
@@ -275,8 +325,52 @@ function bulutVerisiniUygula(tur, veri) {
   }
 }
 
+function yereldenOku(tur) {
+  if (tur === "siparisler") {
+    return kayitOku(VERI_ANAHTARI, {});
+  }
+
+  if (tur === "cariler") {
+    return kayitOku(CARI_ANAHTARI, {});
+  }
+
+  return kayitOku(AYAR_ANAHTARI, {});
+}
+
+// Önceki oturumda buluta ulaşamamış kayıtları tamamlar.
+async function bekleyenYazmalariTamamla() {
+  const isaretler = bekleyenIsaretleri();
+
+  for (const tur of ["siparisler", "cariler", "ayarlar"]) {
+    const zaman = Number(isaretler[tur]);
+
+    if (!zaman) {
+      continue;
+    }
+
+    if (Date.now() - zaman > BEKLEYEN_YAZMA_OMRU_MS) {
+      bekleyenIsaretiniKaldir(tur);
+      continue;
+    }
+
+    try {
+      await belgeyeYaz(
+        tur,
+        JSON.parse(JSON.stringify(yereldenOku(tur) || {}))
+      );
+      bekleyenIsaretiniKaldir(tur);
+    } catch (error) {
+      console.error(
+        `Bekleyen ${tur} kaydı gönderilemedi:`,
+        error
+      );
+    }
+  }
+}
+
 async function ilkBulutVerileriniIndir() {
   yerelYedekAl();
+  await bekleyenYazmalariTamamla();
 
   const turler = [
     "siparisler",
@@ -314,6 +408,15 @@ function gercekZamanliDinlemeyiBaslat() {
         const iptal = belge(tur).onSnapshot(
           (snapshot) => {
             if (!snapshot.exists) {
+              return;
+            }
+
+            // Kendi kaydımızın yankısı ya da kayıt beklerken gelen eski
+            // veri: uygularsak yeni yazılan litre/hareket ekrandan silinir.
+            if (
+              snapshot.metadata.hasPendingWrites ||
+              yazmaBekliyor(tur)
+            ) {
               return;
             }
 
@@ -406,41 +509,12 @@ window.bulutaKaydet = function bulutaKaydet(
     );
   }
 
+  bekleyenVeriler.set(tur, kopya);
+  bekleyenIsaretle(tur);
   bulutDurumunuGoster("Kaydediliyor…");
 
   const timer = setTimeout(
-    async () => {
-      kaydetmeZamanlayicilari.delete(tur);
-
-      try {
-        await belge(tur).set(
-          {
-            value: kopya,
-            updatedAt:
-              firebase.firestore.FieldValue.serverTimestamp(),
-            updatedBy: aktifKullanici.uid
-          },
-          {
-            merge: true
-          }
-        );
-
-        bulutDurumunuGoster(
-          "☁️ Bulut bağlı",
-          "basarili"
-        );
-      } catch (error) {
-        console.error(
-          `Firestore ${tur} kaydetme hatası:`,
-          error
-        );
-
-        bulutDurumunuGoster(
-          "Buluta kaydedilemedi",
-          "hata"
-        );
-      }
-    },
+    () => bekleyeniGonder(tur),
     650
   );
 
@@ -449,6 +523,134 @@ window.bulutaKaydet = function bulutaKaydet(
     timer
   );
 };
+
+// Cari verisi bir işlem (transaction) içinde buluttaki güncel veriyle
+// birleştirilerek yazılır: başka cihazın eklediği hareketler ezilmez.
+async function belgeyeYaz(tur, kopya) {
+  const ref = belge(tur);
+  const zaman =
+    firebase.firestore.FieldValue.serverTimestamp();
+
+  if (
+    tur === "cariler" &&
+    typeof cariBirlestir === "function"
+  ) {
+    return db.runTransaction(async (islem) => {
+      const snapshot = await islem.get(ref);
+      const sunucu = snapshot.exists
+        ? (snapshot.data() || {}).value
+        : {};
+      const birlesik = cariBirlestir(sunucu, kopya);
+
+      islem.set(
+        ref,
+        {
+          value: birlesik,
+          updatedAt: zaman,
+          updatedBy: aktifKullanici.uid
+        },
+        {
+          merge: true
+        }
+      );
+
+      return birlesik;
+    });
+  }
+
+  await ref.set(
+    {
+      value: kopya,
+      updatedAt: zaman,
+      updatedBy: aktifKullanici.uid
+    },
+    {
+      merge: true
+    }
+  );
+
+  return kopya;
+}
+
+async function bekleyeniGonder(tur) {
+  kaydetmeZamanlayicilari.delete(tur);
+
+  if (!bekleyenVeriler.has(tur) || !db || !aktifKullanici) {
+    return;
+  }
+
+  const kopya = bekleyenVeriler.get(tur);
+  bekleyenVeriler.delete(tur);
+  ucustakiYazmalar.set(tur, (ucustakiYazmalar.get(tur) || 0) + 1);
+
+  try {
+    const yazilan = await belgeyeYaz(tur, kopya);
+
+    ucustakiYazmalar.set(tur, ucustakiYazmalar.get(tur) - 1);
+
+    if (!yazmaBekliyor(tur)) {
+      bekleyenIsaretiniKaldir(tur);
+
+      // Birleştirme başka cihazdan gelen kayıtları da içerebilir;
+      // ekranı buluttaki son hâle getir.
+      if (tur === "cariler") {
+        bulutVerisiniUygula(tur, yazilan);
+      }
+    }
+
+    bulutDurumunuGoster(
+      "☁️ Bulut bağlı",
+      "basarili"
+    );
+  } catch (error) {
+    ucustakiYazmalar.set(tur, ucustakiYazmalar.get(tur) - 1);
+
+    console.error(
+      `Firestore ${tur} kaydetme hatası:`,
+      error
+    );
+
+    bulutDurumunuGoster(
+      "Kaydedilemedi, tekrar denenecek",
+      "hata"
+    );
+
+    // Veri bu cihazda duruyor; daha yeni bir kayıt beklemiyorsa
+    // aynı veriyi birkaç saniye sonra yeniden dene.
+    const izinYok =
+      error &&
+      String(error.code || "").includes("permission-denied");
+
+    if (izinYok) {
+      bulutDurumunuGoster("Kaydetme izni yok", "hata");
+    }
+
+    if (!izinYok && !bekleyenVeriler.has(tur) && bulutHazir) {
+      bekleyenVeriler.set(tur, kopya);
+      kaydetmeZamanlayicilari.set(
+        tur,
+        setTimeout(() => bekleyeniGonder(tur), 5000)
+      );
+    }
+  }
+}
+
+// Uygulama arka plana atılır ya da kapatılırsa bekleyen kayıtları
+// 650 ms beklemeden hemen gönder.
+function bekleyenleriHemenGonder() {
+  Array.from(kaydetmeZamanlayicilari.keys()).forEach((tur) => {
+    clearTimeout(kaydetmeZamanlayicilari.get(tur));
+    bekleyeniGonder(tur);
+  });
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    bekleyenleriHemenGonder();
+  }
+});
+
+window.addEventListener("pagehide", bekleyenleriHemenGonder);
 
 girisFormu.addEventListener(
   "submit",
