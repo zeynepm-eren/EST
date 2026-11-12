@@ -6,6 +6,7 @@ const alanlar = {
   gunler: eleman("#gunler"),
   haftaAraligi: eleman("#haftaAraligi"),
   secilenTarih: eleman("#secilenTarih"),
+  tarihGit: eleman("#tarihGit"),
 
   sabah: eleman("#sabahSiparisleri"),
   aksam: eleman("#aksamSiparisleri"),
@@ -440,6 +441,8 @@ function alanlariGoster() {
 
   alanlar.aksamDurum.textContent =
     kayit.aksamDurum || "";
+
+  alanlar.tarihGit.value = tarihAnahtari(secilenTarih());
 
   alanlar.secilenTarih.textContent =
     tarihYaz(
@@ -997,6 +1000,34 @@ alanlar.aksam.addEventListener(
     senkronDurumunuGoster();
   }
 );
+
+// Takvimden tarih seçince doğrudan o güne git.
+const tarihGit = alanlar.tarihGit;
+
+tarihGit.addEventListener("click", () => {
+  // Bilgisayarda alanın herhangi bir yerine tıklayınca takvim açılsın.
+  try {
+    tarihGit.showPicker();
+  } catch {
+    // Desteklemeyen tarayıcıda alan kendi takvimini açar.
+  }
+});
+
+tarihGit.addEventListener("change", () => {
+  if (!tarihGit.value) {
+    return;
+  }
+
+  const secilen = new Date(`${tarihGit.value}T12:00:00`);
+
+  if (Number.isNaN(secilen.getTime())) {
+    return;
+  }
+
+  durum.haftaBaslangici = haftaninPazartesisi(secilen);
+  durum.secilenGun = pazartesiSirasi(secilen);
+  ekraniGoster();
+});
 
 eleman("#oncekiHafta")
   .addEventListener(

@@ -130,7 +130,11 @@
 
     <nav id="gunler" class="gunler"></nav>
 
-    <div id="secilenTarih" class="tarih"></div>
+    <label class="tarih-secici" for="tarihGit">
+      <span id="secilenTarih" class="tarih"></span>
+      <span class="tarih-degistir">📅 Tarih seç</span>
+      <input id="tarihGit" type="date" aria-label="Gitmek istediğin tarihi seç" />
+    </label>
 
     <section class="kart">
       <div class="kart-baslik">
@@ -541,13 +545,6 @@
         <button class="ekstre-filtre-buton" data-ekstre-donem="hafta" type="button">Bu hafta</button>
         <button class="ekstre-filtre-buton" data-ekstre-donem="ay" type="button">Bu ay</button>
         <button class="ekstre-filtre-buton aktif" data-ekstre-donem="tumu" type="button">Tümü</button>
-      </div>
-
-      <div class="ekstre-filtre" aria-label="Hareket türü">
-        <button class="ekstre-filtre-buton aktif" data-ekstre-filtre="hepsi" type="button">Tümü</button>
-        <button class="ekstre-filtre-buton" data-ekstre-filtre="satis" type="button">🥛 Süt</button>
-        <button class="ekstre-filtre-buton" data-ekstre-filtre="bal" type="button">🍯 Bal</button>
-        <button class="ekstre-filtre-buton" data-ekstre-filtre="odeme" type="button">💵 Ödeme</button>
       </div>
 
       <div id="ekstreListesi" class="ekstre-listesi"></div>

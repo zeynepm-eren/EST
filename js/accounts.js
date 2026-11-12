@@ -1237,15 +1237,6 @@ function ekstreyiGoster() {
   cariAlanlar.ekstreBal.textContent = tlYaz(ozet.bal);
   cariAlanlar.ekstreOdeme.textContent = tlYaz(ozet.odeme);
 
-  document
-    .querySelectorAll("[data-ekstre-filtre]")
-    .forEach((buton) => {
-      buton.classList.toggle(
-        "aktif",
-        buton.dataset.ekstreFiltre === cariDurum.ekstreFiltre
-      );
-    });
-
   eleman("#ekstreIslemEkle").classList.toggle("gizli", silinmis);
   eleman("#ekstreMusteriSil").textContent = silinmis
     ? "Müşteriyi geri al"
@@ -1362,7 +1353,11 @@ function ekstreyiGoster() {
     tutar.textContent = hareketTutarMetni(hareket);
 
     const kalan = document.createElement("small");
-    kalan.textContent = `Bakiye ${satirBakiyesi < 0 ? "−" : ""}${tlYaz(Math.abs(satirBakiyesi))}`;
+    // Kuruş altı yuvarlama farkları "−0 TL" gibi görünmesin.
+    const gosterilenBakiye = Math.abs(satirBakiyesi) < 0.005
+      ? 0
+      : satirBakiyesi;
+    kalan.textContent = `Bakiye ${gosterilenBakiye < 0 ? "−" : ""}${tlYaz(Math.abs(gosterilenBakiye))}`;
 
     tutarAlani.appendChild(tutar);
     tutarAlani.appendChild(kalan);
@@ -1971,15 +1966,6 @@ cariAlanlar.ekstrePenceresi.addEventListener("click", (olay) => {
     cariAlanlar.ekstrePenceresi.close();
   }
 });
-
-document
-  .querySelectorAll("[data-ekstre-filtre]")
-  .forEach((buton) => {
-    buton.addEventListener("click", () => {
-      cariDurum.ekstreFiltre = buton.dataset.ekstreFiltre;
-      ekstreyiGoster();
-    });
-  });
 
 eleman("#ekstreIslemEkle").addEventListener("click", () => {
   const musteri = musteriBul(cariDurum.ekstreMusteriId);
